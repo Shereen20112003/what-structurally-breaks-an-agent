@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "experiment_sources_match": true,
+  "analysis_source_matches": true,
+  "episodes_hash_matches": true,
+  "episodes": 393216,
+  "exact_failures": 0,
+  "model_calls": 0,
+  "documents": {
+    "paper": {
+      "pages": 18,
+      "sha256": "81dd3283241e5560debfbefa37b1ff66e9ec56113370e47951ff965333ebc8b3",
+      "references_page": 11
+    },
+    "workshop": {
+      "pages": 11,
+      "sha256": "7a1e6e69c48fd9baefe38a623fda5cc0f5c0e252f8dc40ed04d9535f57b312d9",
+      "references_page": 11
+    },
+    "review": {
+      "pages": 11,
+      "sha256": "e78a771fce7e735ff06ce1297cfed76c70b4d6ff3f1241dcb740550020b0d797",
+      "references_page": 11
+    },
+    "supplement": {
+      "pages": 8,
+      "sha256": "a92b974235ba477c9f4dd8881df869bb4d891b85c8c39628a2a516c0b10eb20e",
+      "references_page": null
+    }
+  },
+  "model_pilot": {
+    "status": "exploratory_pilot_not_confirmatory",
+    "unique_analyzed_episodes": 24,
+    "excluded_duplicate_episodes": 5,
+    "usage_calls_including_smoke": 168,
+    "premium_request_units": 168,
+    "nano_aiu": 16180255000
+  },
+  "model_fractional_factorial": {
+    "episodes": 16,
+    "successes": 8,
+    "mean_completed_operations": 5.5,
+    "model": "gpt-6-luna",
+    "seed_count": 2,
+    "new_ai_credits": 9.472877,
+    "new_premium_request_units": 96,
+    "total_project_ai_credits": 25.653132
+  },
+  "local_model_study": {
+    "episodes": 256,
+    "model": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+    "model_sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+    "runtime": "ggml-org/llama.cpp b12030",
+    "runtime_archive_sha256": "0a4ed4275235508d5e25d31e1a5586ae4e1a08079d09b3a1a78f476f788918c6",
+    "paid_calls": 0,
+    "failure_counts": {
+      "candidate": 54,
+      "dependency": 162,
+      "invalid_action": 18,
+      "invalid_action_schema": 16,
+      "invalid_json": 6
+    }
+  },
+  "historical_eight_page_target_met": false,
+  "current_workshop_call_verified": false,
+  "chains_cache2_width8_history_success": 0.012044270833333334,
+  "document_checks": "No overfull horizontal boxes, unresolved references, or missing glyph warnings",
+  "scope": "Local reference-controller experiments, exploratory Copilot pilot and two-seed half-fraction, and one local-model study; authored full draft and anonymized workshop/review PDFs"
+}

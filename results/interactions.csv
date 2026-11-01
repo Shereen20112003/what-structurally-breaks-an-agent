@@ -1,0 +1,17 @@
+family,policy,interaction,estimate,ci_low,ci_high
+barriers,exact,width_by_observation,0.0,0.0,0.0
+barriers,memory2,width_by_observation,-0.9886067708333334,-0.9928385416666666,-0.9837239583333334
+barriers,memory2_scan4,width_by_observation,-0.6676432291666666,-0.6728515625,-0.6627604166666666
+barriers,memory4,width_by_observation,-0.9684244791666666,-0.9755859375,-0.9602864583333334
+barriers,random_order,width_by_observation,0.0,0.0,0.0
+barriers,scan1,width_by_observation,0.0,0.0,0.0
+barriers,scan4,width_by_observation,0.0,0.0,0.0
+barriers,uniform,width_by_observation,0.0,0.0,0.0
+chains,exact,width_by_observation,0.0,0.0,0.0
+chains,memory2,width_by_observation,-0.9879557291666666,-0.9925130208333334,-0.9833984375
+chains,memory2_scan4,width_by_observation,-0.6689453125,-0.6748046875,-0.6634114583333333
+chains,memory4,width_by_observation,-0.970703125,-0.9781901041666666,-0.9635416666666666
+chains,random_order,width_by_observation,0.0,0.0,0.0
+chains,scan1,width_by_observation,0.0,0.0,0.0
+chains,scan4,width_by_observation,0.0,0.0,0.0
+chains,uniform,width_by_observation,0.0,0.0,0.0

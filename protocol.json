@@ -1,0 +1,20 @@
+{
+  "status": "Frozen local diagnostic protocol before the primary experiment; not an external preregistration",
+  "operations": 8,
+  "families": ["chains", "barriers"],
+  "depth": [1, 2, 4, 8],
+  "branching": [2, 4, 8],
+  "width": [1, 2, 4, 8],
+  "observation": ["snapshot", "history"],
+  "seeds": 256,
+  "bootstrap_resamples": 2000,
+  "bootstrap_seed": 6141,
+  "primary_outcome": "All eight operations completed without any irreversible invalid action",
+  "secondary_outcomes": ["completed operations", "candidate evaluations", "first failure category"],
+  "contrasts": "High minus low endpoint, averaging all other levels equally, separately within each graph family",
+  "interaction": "Width by observation difference-in-differences, width 8 versus 1 and history versus snapshot",
+  "uncertainty": "Percentile bootstrap resampling paired seed blocks, descriptive intervals without hypothesis testing",
+  "exclusions": "No exclusions; generation or solvability failure aborts the run",
+  "paid_model_inference": false,
+  "scope": "Reference-controller instrument validation, not a language-model capability experiment"
+}

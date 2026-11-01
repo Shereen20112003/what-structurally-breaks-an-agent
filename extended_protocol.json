@@ -1,0 +1,22 @@
+{
+  "status": "Follow-on local diagnostic protocol written after inspecting the original results and before running these ablations; not an external preregistration",
+  "seed_start": 10000,
+  "seeds": 256,
+  "bootstrap_resamples": 2000,
+  "bootstrap_seed": 728193,
+  "studies": ["work", "memory", "observation", "recovery", "locality", "selection", "labels"],
+  "work": "N=4,8,16; depth=2,4; B=4,8; W=4; both families; snapshots every action or initial only",
+  "memory": "N=16,D=4,B=4,8,W=4,8; snapshots initial only or every fourth success; fixed caches, adaptive next-use cache, residue cache, precomputed plan and stale cache",
+  "observation": "N=8,D=4,B=4,8,W=4,8; snapshot periods 0,1,2,4; deterministic public updates versus independent hidden resampling after each success",
+  "recovery": "N=8,D=4,B=4,8,W=4,8; global error allowance 0,2,8,56; candidate trials with and without elimination; errors never change state",
+  "locality": "N=16,D=4,B=4,8,W=4,8; balanced, clustered or concentrated queries crossed with additive or static updates",
+  "selection": "N=8,D=4,W=4,B=2,4,8; snapshots every action; scan 1,2,4,8, scan-1 padded with four comparisons, indexed code lookup with explicit preparation accounting",
+  "labels": "N=8,D=4,B=4,8,W=4,8; original random identifiers versus reversed identifiers; both observation channels",
+  "outcomes": ["complete success", "completed operations", "calls", "errors", "candidate comparisons", "lookup calls", "preparation units", "cache entries and representational bits", "plan slots"],
+  "primary_contrasts": "Paired differences for each stated intervention; mean across the explicitly selected anchors, not the original full grid",
+  "secondary_original_analysis": "All six endpoint pairwise interactions and five higher-order endpoint interactions per original policy/family, using the original episode log",
+  "uncertainty": "Descriptive paired seed-block percentile bootstrap; no significance claims; include analytic calibration for rare outcomes",
+  "exclusions": "None; a deterministic exact/controller positive-control failure or analytic bound violation aborts the run",
+  "remote_model_calls": 0,
+  "claim_scope": "Programmed diagnostic controls only; no language-model, training, provider-budget or real-workflow claim"
+}

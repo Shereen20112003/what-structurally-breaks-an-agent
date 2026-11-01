@@ -1,0 +1,26 @@
+{
+  "utc_finished": "2026-10-31T22:47:18.758501+00:00",
+  "seconds": 410.44037180009764,
+  "cases": 1156,
+  "episodes": 295936,
+  "seeds": 256,
+  "seed_start": 10000,
+  "case_counts": {
+    "work": 192,
+    "memory": 96,
+    "observation": 256,
+    "recovery": 256,
+    "labels": 128,
+    "locality": 192,
+    "selection": 36
+  },
+  "source_sha256": {
+    "benchmark.py": "8bad864e29d305150c1861459d58fbeeff87f3fac19c3768c7194b96b2366c98",
+    "extended_benchmark.py": "54b45e69a336a97a4090f5486c6ec436e990d2649aacb7302223ff89e523b270",
+    "run_extended.py": "faac802674e34813de232cfc5d449c105ae0f5e4e849d0106bedab7eb79d265f",
+    "extended_protocol.json": "facfd46ee7951f3cb50157d21d36982c0496e95cf52bd292d4e4468ca9c29851"
+  },
+  "episodes_sha256": "bf1321e5ba96125ca6def0da20ee35f9221686f9fd188228348a61f0fb8fbe1d",
+  "model_calls": 0,
+  "scope": "Programmed diagnostic controls only; no language-model, training, provider-budget or real-workflow claim"
+}

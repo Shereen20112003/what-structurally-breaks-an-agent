@@ -1,0 +1,78 @@
+study,level,policy,reference_level,reference_policy,contrast,estimate,low,high
+work,n16_p0,exact,n4_p0,exact,N16 minus N4,0.0,0.0,0.0
+work,n16_p0,cache2,n4_p0,cache2,N16 minus N4,-0.13427734375,-0.16015625,-0.109375
+work,n16_p0,scan4,n4_p0,scan4,N16 minus N4,-0.0654296875,-0.08251953125,-0.04931640625
+work,n16_p0,random_order,n4_p0,random_order,N16 minus N4,-0.109375,-0.1396484375,-0.0810546875
+work,n16_p1,exact,n4_p1,exact,N16 minus N4,0.0,0.0,0.0
+work,n16_p1,cache2,n4_p1,cache2,N16 minus N4,0.0,0.0,0.0
+work,n16_p1,scan4,n4_p1,scan4,N16 minus N4,-0.0654296875,-0.08251953125,-0.04736328125
+work,n16_p1,random_order,n4_p1,random_order,N16 minus N4,-0.109375,-0.140625,-0.0810546875
+memory,p0,adaptive2,p0,cache2,adaptive2 minus cache2,0.00048828125,0.0,0.00146484375
+memory,p0,modulo8,p0,cache2,modulo8 minus cache2,1.0,1.0,1.0
+memory,p0,precomputed_plan,p0,cache2,precomputed_plan minus cache2,1.0,1.0,1.0
+memory,p0,cache4,p0,cache2,cache4 minus cache2,0.5,0.5,0.5
+memory,p4,adaptive2,p4,cache2,adaptive2 minus cache2,0.09521484375,0.07861328125,0.11181640625
+memory,p4,modulo8,p4,cache2,modulo8 minus cache2,1.0,1.0,1.0
+memory,p4,precomputed_plan,p4,cache2,precomputed_plan minus cache2,1.0,1.0,1.0
+memory,p4,cache4,p4,cache2,cache4 minus cache2,0.5,0.5,0.5
+observation,p0_shock1,exact,p0_shock0,exact,Hidden resampling minus public updates,-1.0,-1.0,-1.0
+observation,p0_shock1,cache2,p0_shock0,cache2,Hidden resampling minus public updates,-0.0029296875,-0.005859375,-0.00048828125
+observation,p0_shock1,scan4,p0_shock0,scan4,Hidden resampling minus public updates,-0.5068359375,-0.51123046875,-0.50341796875
+observation,p0_shock1,uniform,p0_shock0,uniform,Hidden resampling minus public updates,0.0,0.0,0.0
+observation,p1_shock1,exact,p1_shock0,exact,Hidden resampling minus public updates,0.0,0.0,0.0
+observation,p1_shock1,cache2,p1_shock0,cache2,Hidden resampling minus public updates,0.0,0.0,0.0
+observation,p1_shock1,scan4,p1_shock0,scan4,Hidden resampling minus public updates,0.0029296875,-0.00341796875,0.00927734375
+observation,p1_shock1,uniform,p1_shock0,uniform,Hidden resampling minus public updates,0.0,0.0,0.0
+observation,p2_shock1,exact,p2_shock0,exact,Hidden resampling minus public updates,-0.9970703125,-0.99951171875,-0.994140625
+observation,p2_shock1,cache2,p2_shock0,cache2,Hidden resampling minus public updates,-0.04345703125,-0.05419921875,-0.03271484375
+observation,p2_shock1,scan4,p2_shock0,scan4,Hidden resampling minus public updates,-0.50439453125,-0.50927734375,-0.49951171875
+observation,p2_shock1,uniform,p2_shock0,uniform,Hidden resampling minus public updates,0.0,0.0,0.0
+observation,p4_shock1,exact,p4_shock0,exact,Hidden resampling minus public updates,-1.0,-1.0,-1.0
+observation,p4_shock1,cache2,p4_shock0,cache2,Hidden resampling minus public updates,-0.00439453125,-0.00732421875,-0.001953125
+observation,p4_shock1,scan4,p4_shock0,scan4,Hidden resampling minus public updates,-0.5068359375,-0.51123046875,-0.5029296875
+observation,p4_shock1,uniform,p4_shock0,uniform,Hidden resampling minus public updates,0.0,0.0,0.0
+recovery,r0_p0,uniform_eliminate,r0_p0,uniform,Elimination minus replacement,0.0,0.0,0.0
+recovery,r2_p0,uniform_eliminate,r2_p0,uniform,Elimination minus replacement,-0.00048828125,-0.00146484375,0.0
+recovery,r8_p0,uniform_eliminate,r8_p0,uniform,Elimination minus replacement,0.052734375,0.04150390625,0.06494140625
+recovery,r56_p0,uniform_eliminate,r56_p0,uniform,Elimination minus replacement,0.21435546875,0.19482421875,0.23388671875
+recovery,r0_p1,uniform_eliminate,r0_p1,uniform,Elimination minus replacement,0.0,0.0,0.0
+recovery,r2_p1,uniform_eliminate,r2_p1,uniform,Elimination minus replacement,-0.00048828125,-0.00146484375,0.0
+recovery,r8_p1,uniform_eliminate,r8_p1,uniform,Elimination minus replacement,0.052734375,0.04150390625,0.06396484375
+recovery,r56_p1,uniform_eliminate,r56_p1,uniform,Elimination minus replacement,0.21435546875,0.19482421875,0.2333984375
+locality,clustered_additive,cache2,balanced_additive,cache2,Clustered minus balanced,0.0,0.0,0.0
+locality,clustered_additive,adaptive2,balanced_additive,adaptive2,Clustered minus balanced,0.01806640625,0.01220703125,0.0244140625
+locality,clustered_additive,exact,balanced_additive,exact,Clustered minus balanced,0.0,0.0,0.0
+locality,clustered_additive,stale8,balanced_additive,stale8,Clustered minus balanced,0.00146484375,0.0,0.00390625
+locality,clustered_static,cache2,balanced_static,cache2,Clustered minus balanced,0.0,0.0,0.0
+locality,clustered_static,adaptive2,balanced_static,adaptive2,Clustered minus balanced,0.01708984375,0.01123046875,0.02294921875
+locality,clustered_static,exact,balanced_static,exact,Clustered minus balanced,0.0,0.0,0.0
+locality,clustered_static,stale8,balanced_static,stale8,Clustered minus balanced,0.0,0.0,0.0
+locality,balanced_static,cache2,balanced_additive,cache2,Static minus additive,0.0,0.0,0.0
+locality,balanced_static,adaptive2,balanced_additive,adaptive2,Static minus additive,0.0,-0.00146484375,0.00146484375
+locality,balanced_static,exact,balanced_additive,exact,Static minus additive,0.0,0.0,0.0
+locality,balanced_static,stale8,balanced_additive,stale8,Static minus additive,1.0,1.0,1.0
+locality,clustered_static,cache2,clustered_additive,cache2,Static minus additive,0.0,0.0,0.0
+locality,clustered_static,adaptive2,clustered_additive,adaptive2,Static minus additive,-0.0009765625,-0.0078125,0.005859375
+locality,clustered_static,exact,clustered_additive,exact,Static minus additive,0.0,0.0,0.0
+locality,clustered_static,stale8,clustered_additive,stale8,Static minus additive,0.99853515625,0.99609375,1.0
+locality,concentrated_static,cache2,concentrated_additive,cache2,Static minus additive,0.0,0.0,0.0
+locality,concentrated_static,adaptive2,concentrated_additive,adaptive2,Static minus additive,0.0,0.0,0.0
+locality,concentrated_static,exact,concentrated_additive,exact,Static minus additive,0.0,0.0,0.0
+locality,concentrated_static,stale8,concentrated_additive,stale8,Static minus additive,0.90576171875,0.8798828125,0.93017578125
+selection,b2,scan1_padded4,b2,scan1,scan1_padded4 minus scan1,0.0,0.0,0.0
+selection,b2,scan4_fixed,b2,scan1,scan4_fixed minus scan1,0.0,0.0,0.0
+selection,b2,indexed,b2,scan1,indexed minus scan1,0.0,0.0,0.0
+selection,b4,scan1_padded4,b4,scan1,scan1_padded4 minus scan1,0.0,0.0,0.0
+selection,b4,scan4_fixed,b4,scan1,scan4_fixed minus scan1,0.994140625,0.986328125,1.0
+selection,b4,indexed,b4,scan1,indexed minus scan1,0.994140625,0.986328125,1.0
+selection,b8,scan1_padded4,b8,scan1,scan1_padded4 minus scan1,0.0,0.0,0.0
+selection,b8,scan4_fixed,b8,scan1,scan4_fixed minus scan1,0.01171875,0.001953125,0.0234375
+selection,b8,indexed,b8,scan1,indexed minus scan1,1.0,1.0,1.0
+labels,reverse1_p0,exact,reverse0_p0,exact,Reversed minus original identifiers,0.0,0.0,0.0
+labels,reverse1_p0,cache2,reverse0_p0,cache2,Reversed minus original identifiers,-0.00146484375,-0.0048828125,0.00146484375
+labels,reverse1_p0,scan4,reverse0_p0,scan4,Reversed minus original identifiers,-0.00244140625,-0.005859375,0.00146484375
+labels,reverse1_p0,random_order,reverse0_p0,random_order,Reversed minus original identifiers,0.0,0.0,0.0
+labels,reverse1_p1,exact,reverse0_p1,exact,Reversed minus original identifiers,0.0,0.0,0.0
+labels,reverse1_p1,cache2,reverse0_p1,cache2,Reversed minus original identifiers,0.0,0.0,0.0
+labels,reverse1_p1,scan4,reverse0_p1,scan4,Reversed minus original identifiers,-0.00244140625,-0.00634765625,0.00146484375
+labels,reverse1_p1,random_order,reverse0_p1,random_order,Reversed minus original identifiers,0.0,0.0,0.0

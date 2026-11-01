@@ -1,0 +1,17 @@
+{
+  "utc_finished": "2026-10-31T21:45:54.677233+00:00",
+  "python": "3.12.10",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "seeds": 256,
+  "tasks": 49152,
+  "episodes": 393216,
+  "seconds": 117.10780290002003,
+  "source_sha256": {
+    "benchmark.py": "8bad864e29d305150c1861459d58fbeeff87f3fac19c3768c7194b96b2366c98",
+    "run_experiments.py": "f70351809c7c6e5bf02f4e21bd21b89fbdb4f9e2c8d6b6260838ef6cff37c6fc",
+    "protocol.json": "243773c6105e900d7bb0cc1d13f8084029f34b698210fd7b7843ccf2444cbac8"
+  },
+  "episodes_sha256": "2a89d3939685374d3ba75157123950b15e1b271ee98099288b18b6c4a61fa4f3",
+  "model_calls": 0,
+  "scope": "Reference-controller instrument validation, not a language-model capability experiment"
+}

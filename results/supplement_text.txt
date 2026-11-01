@@ -1,0 +1,376 @@
+PAGE 1
+Supplement: Auditing Diﬀiculty in Stateful T ool-Use W orkflows
+Shereen Anand
+Microsoft Research
+t-sheanand@microsoft.com
+1 Complete Experimental Specification
+The primary experiment and follow-on experiment are separately recorded. The primary grid uses N = 8, depths
+{1, 2, 4, 8}, candidate counts {2, 4, 8}, active widths {1, 2, 4, 8}, both snapshot endpoints, and both graph families.
+Its seeds are 0–255 and each task is evaluated by eight programmed controllers. The follow-on grids use the anchors
+in the main-text ablation design; their full per-controller configurations are in results_extended/case_design.
+json.
+Pairing and randomness. The base generator draws a fixed eight-slot initial array , a permutation of operation
+identifiers, a shuffled balanced query assignment, update registers, nonzero increments, and candidate permutations.
+Candidate-count levels filter the same eight-code permutation; active-width levels project query and update indices
+into the active width. Across work levels, different numbers of operations cause different subsequent random draws,
+so seed pairing is not exact surface matching. Hidden resampling uses a separate seeded random stream, draws
+eight fresh values after each success, and replaces only active registers. F ailed trials never advance that stream.
+Controller sampling uses its own stream. Common controller seeds pair variants, but differing controller logic
+can consume different numbers of draws. These choices are intended for reproducibility , not to certify statistical
+independence of every repeated condition.
+Admission and positive controls. There is no outcome-based rejection or regeneration. All balanced tasks
+must query every active register; clustered assignments preserve that coverage and its multiplicities. Concentrated-
+query variants explicitly have effective width one and are tagged as a degenerate manipulation. Positive controls
+include unrestricted deterministic tracking, residue tracking, deterministic preplanning, unrestricted tracking with
+a snapshot after every hidden resampling, and candidate elimination with the worst-case error allowance. The
+runner aborts if a designated positive control fails, if the call horizon is exceeded, or if the adaptive cache exceeds
+two entries. Analytic probabilities are derived only for supported cases; unsupported predictions are labelled
+not_derived, not replaced with a default or fitted estimate.
+Adaptive-cache details. Next-use-2 uses the public deterministic ready schedule to prioritize registers queried
+in the future. On a visible snapshot, the current query can be answered directly , so future-use selection skips that
+operation. During history-only feedback, a successful action confirms the queried residue from the chosen candidate
+code. The controller inserts that residue, applies the public increment if relevant, and evicts values whose next use
+is furthest away . This is not a generic learned memory strategy; future-query metadata, successful-action feedback,
+and public updates are deliberate advantages of the control.
+Preparation and storage accounting. Residue caches store values modulo b; raw-value caches store values
+modulo eight. Reported value bits exclude dictionary keys, graph metadata, controller code, temporary operands,
+and runtime overhead. Preplanning records N candidate slots, using the initial state as preparation workspace;
+indexed selection records N maps of b code-to-slot entries. The preparation counter charges Nb table entries for
+each of these representations. It is a workload proxy , not a measurement of exact executed CPU instructions or
+comparison count in Python’s index function. Lookup counts are kept separate from predicate comparisons. The
+experiment does not aggregate these categories into an invented universal compute unit.
+1
+
+PAGE 2
+2 Calibration Derivations
+2.1 Completion states and schedule probabilities
+F ork = N/d disjoint chains, a completion set is determined by the completed prefix length 0, . . . , d of each chain,
+giving (d+1)k reachable masks. Each chain imposes one internal order on its d operations; interleaving the k orders
+gives N!/(d!)k valid permutations. A uniformly sampled operation permutation therefore succeeds with probability
+(d!)−k.
+F or barriers, all previous layers must be complete before any operation in the next layer succeeds. Each of the
+d layers contributes 2k − 1 nonempty partial-completion choices, with one initial empty mask, giving d(2k − 1) + 1
+distinct masks. Each layer’s operations can be internally permuted in k! ways, so the valid-order count is (k!)d and
+random-order success is (k!)d/N!. F ailed-action sinks are not included in these completion-mask counts.
+2.2 Deterministic history and residue suﬀiciency
+Let Ct be the completed-operation set after t successes. Because each update is additive and public,
+xr(t) =xr(0) +
+∑
+v∈Ct:uv=r
+δv (mod 8).
+Thus the initial observation and successful-action history determine every register exactly . Repeating snapshots
+cannot improve optimal information availability in this deterministic protocol, although it can help a restricted
+retention strategy . Since each tested b divides eight, the same equation modulo b determines every candidate
+predicate. T racking xr mod b is therefore suﬀicient; storing all three raw value bits is not necessary for b = 2 or
+b = 4.
+A known ready schedule can also be simulated once using the initial observation. Recording its future candidate
+slots is an exact plan in the deterministic protocol. That construction establishes an alternative representation,
+not a lower bound on memory and not a claim that planning uses less total storage or preparation.
+2.3 Missing-information ceiling
+In the hidden-resampling condition, all active values are freshly uniform after each success. Before a masked
+decision, conditioning on any visible history still leaves the queried code uniform on0, . . . , b −1. Choosing a different
+ready operation cannot change this fact, because every active register has the same independent fresh distribution.
+Consequently , the conditional probability of each hidden decision succeeding is at most1/b, regardless of additional
+computation.
+With no retries, the number of visible decisions on a successful path is v = ⌈N/h⌉ for snapshot period h > 0,
+or v = 1 for initial-only feedback. Applying the chain rule gives P(complete) ≤ b−(N−v). An unrestricted exact
+controller attains this ceiling. The bound does not apply unchanged to recovery protocols: failed trials preserve
+state and provide information that can support elimination. F or scan-limited controllers, formulas that average
+visible candidate-order draws are ensemble predictions and are labelled separately from exact instance-conditional
+predictions.
+2.4 Finite retry budgets
+Uniform replacement guesses have success probability p = 1/b per attempt. If F is the number of errors before N
+successes, then
+Pr(F ≤ R) =
+R∑
+r=0
+(N + r − 1
+r
+)
+pN (1 − p)r.
+Under uniform elimination, the correct code has a uniformly random rank in a permutation of the b candidates.
+Errors per operation are therefore independent uniform counts on {0, . . . , b − 1}. The finite-budget probability is
+Pr(F ≤ R) = 1
+bN
+R∑
+r=0
+[zr](1 +z + · · · + zb−1)N .
+The implementation evaluates this coeﬀicient sum by a truncated convolution. If R ≥ N(b − 1) the probability
+is one. Mean calls without budget exhaustion are Nb for replacement and N(b + 1)/2 for elimination. These are
+exact properties of the selected guessing policies, not general guarantees for arbitrary tool-using controllers.
+2
+
+PAGE 3
+3 All F ollow-On Outcome Summaries
+Each row below averages equally over the remaining anchors of its grid. Low and high are descriptive 95% percentile
+bands from 2,000 paired seed-block bootstrap resamples. They are not simultaneous confidence statements. Con-
+stants produce degenerate bands; a sampled zero is not a proof of zero probability . Calls include failed attempts and
+stop at termination. F or exact analytic predictions, progress, error counts, comparison counts, preparation work-
+load, lookups, and cache measurements, see results_extended/summary.csv. All 77 paired contrast estimates
+and their bands are in results_extended/paired_contrasts.csv.
+Condition notation uses n for operation count, p for snapshot period, r for global error allowance, and shock1
+for independent hidden resampling. Period zero means initial-only state feedback. The reverse flag indicates
+operation identifier reversal. All grids use both graph families.
+3.1 Operation Count
+Condition Controller Success (%) Low High Calls
+n16_p0 Cache-2 0.00 0.00 0.00 3.38
+n16_p0 Exact 100.00 100.00 100.00 16.00
+n16_p0 Random schedule 0.00 0.00 0.00 1.69
+n16_p0 Scan-4 50.05 50.00 50.15 9.44
+n16_p1 Cache-2 100.00 100.00 100.00 16.00
+n16_p1 Exact 100.00 100.00 100.00 16.00
+n16_p1 Random schedule 0.00 0.00 0.00 1.69
+n16_p1 Scan-4 50.05 50.00 50.15 9.44
+n4_p0 Cache-2 13.43 10.94 16.21 2.93
+n4_p0 Exact 100.00 100.00 100.00 4.00
+n4_p0 Random schedule 10.94 8.11 13.96 1.60
+n4_p0 Scan-4 56.59 54.88 58.50 3.13
+n4_p1 Cache-2 100.00 100.00 100.00 4.00
+n4_p1 Exact 100.00 100.00 100.00 4.00
+n4_p1 Random schedule 10.94 8.01 13.96 1.60
+n4_p1 Scan-4 56.59 54.88 58.40 3.13
+n8_p0 Cache-2 0.73 0.29 1.22 3.17
+n8_p0 Exact 100.00 100.00 100.00 8.00
+n8_p0 Random schedule 1.17 0.49 1.95 1.63
+n8_p0 Scan-4 50.59 50.24 51.03 5.18
+n8_p1 Cache-2 100.00 100.00 100.00 8.00
+n8_p1 Exact 100.00 100.00 100.00 8.00
+n8_p1 Random schedule 1.17 0.49 1.95 1.63
+n8_p1 Scan-4 50.59 50.20 51.03 5.18
+3.2 Retention Strategy
+Condition Controller Success (%) Low High Calls
+p0 Next-use-2 0.05 0.00 0.15 5.05
+p0 Cache-2 0.00 0.00 0.00 2.98
+p0 Cache-4 50.00 50.00 50.00 9.66
+p0 Residue-8 100.00 100.00 100.00 16.00
+p0 Precomputed plan 100.00 100.00 100.00 16.00
+p0 Stale-8 0.00 0.00 0.00 4.20
+p4 Next-use-2 9.52 7.86 11.28 7.68
+p4 Cache-2 0.00 0.00 0.00 3.10
+p4 Cache-4 50.00 50.00 50.00 9.76
+p4 Residue-8 100.00 100.00 100.00 16.00
+p4 Precomputed plan 100.00 100.00 100.00 16.00
+p4 Stale-8 2.98 2.05 4.05 5.33
+3
+
+PAGE 4
+3.3 Snapshot Cadence and Hidden Resampling
+Condition Controller Success (%) Low High Calls
+p0_shock0 Cache-2 0.29 0.05 0.59 2.85
+p0_shock0 Exact 100.00 100.00 100.00 8.00
+p0_shock0 Scan-4 50.68 50.34 51.12 5.18
+p0_shock0 Uniform 0.00 0.00 0.00 1.25
+p0_shock1 Cache-2 0.00 0.00 0.00 2.25
+p0_shock1 Exact 0.00 0.00 0.00 2.25
+p0_shock1 Scan-4 0.00 0.00 0.00 2.01
+p0_shock1 Uniform 0.00 0.00 0.00 1.25
+p1_shock0 Cache-2 100.00 100.00 100.00 8.00
+p1_shock0 Exact 100.00 100.00 100.00 8.00
+p1_shock0 Scan-4 50.68 50.34 51.12 5.18
+p1_shock0 Uniform 0.00 0.00 0.00 1.25
+p1_shock1 Cache-2 100.00 100.00 100.00 8.00
+p1_shock1 Exact 100.00 100.00 100.00 8.00
+p1_shock1 Scan-4 50.98 50.54 51.46 5.25
+p1_shock1 Uniform 0.00 0.00 0.00 1.25
+p2_shock0 Cache-2 4.64 3.66 5.71 3.58
+p2_shock0 Exact 100.00 100.00 100.00 8.00
+p2_shock0 Scan-4 50.68 50.34 51.17 5.18
+p2_shock0 Uniform 0.00 0.00 0.00 1.25
+p2_shock1 Cache-2 0.29 0.05 0.59 2.49
+p2_shock1 Exact 0.29 0.05 0.59 2.49
+p2_shock1 Scan-4 0.24 0.05 0.54 2.21
+p2_shock1 Uniform 0.00 0.00 0.00 1.25
+p4_shock0 Cache-2 0.44 0.20 0.73 2.93
+p4_shock0 Exact 100.00 100.00 100.00 8.00
+p4_shock0 Scan-4 50.68 50.29 51.07 5.18
+p4_shock0 Uniform 0.00 0.00 0.00 1.25
+p4_shock1 Cache-2 0.00 0.00 0.00 2.27
+p4_shock1 Exact 0.00 0.00 0.00 2.27
+p4_shock1 Scan-4 0.00 0.00 0.00 2.03
+p4_shock1 Uniform 0.00 0.00 0.00 1.25
+3.4 Recovery and Candidate Elimination
+Condition Controller Success (%) Low High Calls
+r0_p0 Cache-2 + eliminate 0.29 0.05 0.59 2.85
+r0_p0 Scan-1 + eliminate 0.29 0.10 0.54 1.64
+r0_p0 Uniform 0.00 0.00 0.00 1.25
+r0_p0 Eliminate 0.00 0.00 0.00 1.25
+r0_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r0_p1 Scan-1 + eliminate 0.29 0.10 0.54 1.64
+r0_p1 Uniform 0.00 0.00 0.00 1.25
+r0_p1 Eliminate 0.00 0.00 0.00 1.25
+r2_p0 Cache-2 + eliminate 3.52 2.59 4.49 5.86
+r2_p0 Scan-1 + eliminate 2.93 2.10 3.76 5.11
+r2_p0 Uniform 0.05 0.00 0.15 3.72
+r2_p0 Eliminate 0.00 0.00 0.00 3.92
+r2_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r2_p1 Scan-1 + eliminate 2.93 2.10 3.81 5.11
+r2_p1 Uniform 0.05 0.00 0.15 3.72
+r2_p1 Eliminate 0.00 0.00 0.00 3.92
+r56_p0 Cache-2 + eliminate 100.00 100.00 100.00 18.94
+r56_p0 Scan-1 + eliminate 100.00 100.00 100.00 21.52
+r56_p0 Uniform 78.56 76.61 80.52 43.27
+4
+
+PAGE 5
+Condition Controller Success (%) Low High Calls
+r56_p0 Eliminate 100.00 100.00 100.00 27.87
+r56_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r56_p1 Scan-1 + eliminate 100.00 100.00 100.00 21.52
+r56_p1 Uniform 78.56 76.71 80.47 43.27
+r56_p1 Eliminate 100.00 100.00 100.00 27.87
+r8_p0 Cache-2 + eliminate 44.63 42.77 46.39 13.63
+r8_p0 Scan-1 + eliminate 43.07 41.75 44.38 12.81
+r8_p0 Uniform 1.27 0.78 1.81 11.09
+r8_p0 Eliminate 6.54 5.42 7.67 12.64
+r8_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r8_p1 Scan-1 + eliminate 43.07 41.75 44.43 12.81
+r8_p1 Uniform 1.27 0.78 1.81 11.09
+r8_p1 Eliminate 6.54 5.42 7.67 12.64
+3.5 Query Locality and State Updates
+Condition Controller Success (%) Low High Calls
+balanced_additive Next-use-2 0.05 0.00 0.15 5.05
+balanced_additive Cache-2 0.00 0.00 0.00 2.98
+balanced_additive Exact 100.00 100.00 100.00 16.00
+balanced_additive Stale-8 0.00 0.00 0.00 4.20
+balanced_static Next-use-2 0.05 0.00 0.15 5.05
+balanced_static Cache-2 0.00 0.00 0.00 3.04
+balanced_static Exact 100.00 100.00 100.00 16.00
+balanced_static Stale-8 100.00 100.00 100.00 16.00
+clustered_additive Next-use-2 1.86 1.32 2.44 7.67
+clustered_additive Cache-2 0.00 0.00 0.00 7.26
+clustered_additive Exact 100.00 100.00 100.00 16.00
+clustered_additive Stale-8 0.15 0.00 0.39 4.80
+clustered_static Next-use-2 1.76 1.17 2.34 7.68
+clustered_static Cache-2 0.00 0.00 0.00 7.24
+clustered_static Exact 100.00 100.00 100.00 16.00
+clustered_static Stale-8 100.00 100.00 100.00 16.00
+concentrated_additive Next-use-2 100.00 100.00 100.00 16.00
+concentrated_additive Cache-2 100.00 100.00 100.00 16.00
+concentrated_additive Exact 100.00 100.00 100.00 16.00
+concentrated_additive Stale-8 9.42 6.93 12.11 7.21
+concentrated_static Next-use-2 100.00 100.00 100.00 16.00
+concentrated_static Cache-2 100.00 100.00 100.00 16.00
+concentrated_static Exact 100.00 100.00 100.00 16.00
+concentrated_static Stale-8 100.00 100.00 100.00 16.00
+3.6 Candidate Selection and Resource Controls
+Condition Controller Success (%) Low High Calls
+b2 Exact 100.00 100.00 100.00 8.00
+b2 Indexed 100.00 100.00 100.00 8.00
+b2 Scan-1 100.00 100.00 100.00 8.00
+b2 Sham-check-4 100.00 100.00 100.00 8.00
+b2 Scan-2 100.00 100.00 100.00 8.00
+b2 Fixed-check-4 100.00 100.00 100.00 8.00
+b4 Exact 100.00 100.00 100.00 8.00
+b4 Indexed 100.00 100.00 100.00 8.00
+b4 Scan-1 0.59 0.00 1.37 2.00
+b4 Sham-check-4 0.59 0.00 1.37 2.00
+5
+
+PAGE 6
+Condition Controller Success (%) Low High Calls
+b4 Scan-2 9.18 6.64 12.11 3.55
+b4 Fixed-check-4 100.00 100.00 100.00 8.00
+b8 Exact 100.00 100.00 100.00 8.00
+b8 Indexed 100.00 100.00 100.00 8.00
+b8 Scan-1 0.00 0.00 0.00 1.25
+b8 Sham-check-4 0.00 0.00 0.00 1.25
+b8 Scan-2 0.00 0.00 0.00 1.61
+b8 Fixed-check-4 1.17 0.20 2.34 2.39
+3.7 Operation Identifiers
+Condition Controller Success (%) Low High Calls
+reverse0_p0 Cache-2 0.29 0.05 0.59 2.85
+reverse0_p0 Exact 100.00 100.00 100.00 8.00
+reverse0_p0 Random schedule 0.00 0.00 0.00 1.29
+reverse0_p0 Scan-4 50.68 50.34 51.12 5.18
+reverse0_p1 Cache-2 100.00 100.00 100.00 8.00
+reverse0_p1 Exact 100.00 100.00 100.00 8.00
+reverse0_p1 Random schedule 0.00 0.00 0.00 1.29
+reverse0_p1 Scan-4 50.68 50.29 51.12 5.18
+reverse1_p0 Cache-2 0.15 0.00 0.34 2.88
+reverse1_p0 Exact 100.00 100.00 100.00 8.00
+reverse1_p0 Random schedule 0.00 0.00 0.00 1.35
+reverse1_p0 Scan-4 50.44 50.15 50.83 5.23
+reverse1_p1 Cache-2 100.00 100.00 100.00 8.00
+reverse1_p1 Exact 100.00 100.00 100.00 8.00
+reverse1_p1 Random schedule 0.00 0.00 0.00 1.35
+reverse1_p1 Scan-4 50.44 50.10 50.83 5.23
+4 All Endpoint Interaction Estimates
+The following estimates are exploratory follow-on analyses of the original 192-cell factorial experiment. D, B, W, O
+denote depth, candidate count, active width, and history-only versus snapshot feedback. Endpoint contrasts use
+high minus low for each participating dimension and average all nonparticipating controls over their original levels.
+A pairwise interaction is a difference-in-differences; the corresponding signed construction generalizes to orders
+three and four. V alues are percentage points, so an interaction is not itself a success probability . Per-estimate
+bootstrap bands are retained in results_extended/all_endpoint_interactions.csv.
+6
+
+PAGE 7
+F amily Controller D × B D × W D × O B × W B × O W × O
+Barriers exact 0.00 0.00 0.00 0.00 0.00 0.00
+Barriers memory2 -0.10 0.10 0.10 -2.05 -2.05 -97.95
+Barriers memory2_scan4 0.49 -1.27 0.10 48.93 47.56 -50.68
+Barriers memory4 0.68 -0.68 -0.68 -4.00 -4.00 -95.61
+Barriers random_order 0.00 0.00 0.00 0.00 0.00 0.00
+Barriers scan1 0.00 0.00 0.00 0.00 0.00 0.00
+Barriers scan4 -0.59 0.59 0.00 2.93 0.00 0.00
+Barriers uniform -0.59 0.98 0.00 -0.59 0.00 0.00
+Chains exact 0.00 0.00 0.00 0.00 0.00 0.00
+Chains memory2 -0.10 0.10 0.10 -2.05 -2.05 -97.95
+Chains memory2_scan4 0.49 -1.27 0.10 48.93 47.56 -50.68
+Chains memory4 0.68 -0.68 -0.68 -4.00 -4.00 -95.61
+Chains random_order 0.00 0.00 0.00 0.00 0.00 0.00
+Chains scan1 0.00 0.00 0.00 0.00 0.00 0.00
+Chains scan4 -0.59 0.59 0.00 2.93 0.00 0.00
+Chains uniform -0.59 0.98 0.00 -0.59 0.00 0.00
+F amily Controller D × B × W D × B × O D × W × O B × W × O D × B × W × O
+Barriers exact 0.00 0.00 0.00 0.00 0.00
+Barriers memory2 -0.20 -0.20 0.20 -4.10 -0.39
+Barriers memory2_scan4 -1.37 1.37 0.20 95.12 2.73
+Barriers memory4 1.37 1.37 -1.37 -8.01 2.73
+Barriers random_order 0.00 0.00 0.00 0.00 0.00
+Barriers scan1 0.00 0.00 0.00 0.00 0.00
+Barriers scan4 1.17 0.00 0.00 0.00 0.00
+Barriers uniform -1.95 0.00 0.00 0.00 0.00
+Chains exact 0.00 0.00 0.00 0.00 0.00
+Chains memory2 -0.20 -0.20 0.20 -4.10 -0.39
+Chains memory2_scan4 -1.37 1.37 0.20 95.12 2.73
+Chains memory4 1.37 1.37 -1.37 -8.01 2.73
+Chains random_order 0.00 0.00 0.00 0.00 0.00
+Chains scan1 0.00 0.00 0.00 0.00 0.00
+Chains scan4 1.17 0.00 0.00 0.00 0.00
+Chains uniform -1.95 0.00 0.00 0.00 0.00
+5 W orkshop Comparison and Submission Scope
+W e inspected four ALA 2025 papers as a purposive sample, not all workshop papers and not a systematic nov-
+elty search. Their total PDF lengths are nine pages (failure sampling), ten (Dynamic Thinker), ten (task-graph
+scheduling), and eight (deliberation cost). References begin on pages nine, eight, seven, and eight, respectively .
+T otal PDF length therefore does not equal the allowed main-text length.
+The historical ALA 2025 call allows original work up to eight pages excluding references, and preliminary or
+outlook papers up to six pages. It specifies double-blind review and deanonymized camera-ready copies. Our ex-
+panded authored version is a preprint-style manuscript with an appendix; the separate review.tex source removes
+the author block and appendix, but must still be checked against the current workshop’s track and page rules.
+A longer document is not evidence of acceptance or of a stronger contribution. No current-edition acceptance,
+conference metadata, or submission date is asserted.
+7
+
+PAGE 8
+6 Reproduction and Evidence Boundaries
+The benchmark, controllers, tests, and analysis use the Python standard library . Document inspection additionally
+uses the pinned PDF packages. F rom the project directory in a Windows PowerShell terminal:
+.\.venv\Scripts\python.exe -m unittest -v test_benchmark test_extended
+.\.venv\Scripts\python.exe run_experiments.py --seeds 256
+.\.venv\Scripts\python.exe analyze.py
+.\.venv\Scripts\python.exe run_extended.py
+.\.venv\Scripts\python.exe analyze_extended.py
+.\build.ps1
+.\.venv\Scripts\python.exe verify_artifact.py
+.\.venv\Scripts\python.exe package_artifact.py
+Re-running the primary experiment replaces its generated records; the source and protocol hashes must match the
+supplied metadata when reproducing that study . The original and follow-on episode files have separate hashes and
+execution metadata. The two locally frozen protocols and the time ordering of exploratory analyses are retained
+explicitly . Complete primary contrasts, rare-scheduler Wilson intervals, and example traces remain available in the
+original result directory .
+This artifact contains only programmed-controller evidence. No frontier model, learned policy , training run,
+provider reasoning-budget intervention, human participant, or realistic transfer task has been evaluated. Source
+compilation and local reproducibility do not establish arXiv moderation approval, workshop acceptance, or com-
+patibility with a particular submission processor. The author must review the manuscript and current submission
+rules before uploading it.
+8

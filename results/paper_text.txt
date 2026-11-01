@@ -1,0 +1,1431 @@
+PAGE 1
+What Structurally Breaks an Agent?
+Auditing Difficulty in Stateful Tool-Use Workflows
+Shereen Anand
+Microsoft Research
+Bangalore, India
+t-sheanand@microsoft.com
+ABSTRACT
+Anaggregatetaskscoredoesnotdistinguishfailuresofscheduling,
+state retention, and candidate selection. We develop a small exe-
+cutable instrument that varies dependency depth, candidate count,
+active state width, and access to current-state snapshots while
+holdingthenumberofrequiredoperationsfixed.Twodependency-
+graph families expose an important limitation of structural con-
+trol: increasing depth at fixed work changes both scheduling free-
+dom and the number of reachable completion states. We quantify
+these couplings instead of treating the controls as universally in-
+dependent. The primary study contains 49,152 generated tasks
+and 393,216 reference-controller rollouts. A separately frozen
+follow-on design adds 295,936 rollouts covering operation count,
+retention strategy, snapshot cadence, hidden state resampling,
+recovery, query locality, update removal, candidate indexing, re-
+dundant computation, and relabeling. The ablations expose rep-
+resentation dependence: residue caches and precomputed plans
+solve tasks that defeat limited raw-value caches, while indexed
+selection removes the serial-scan branching deficit. Hidden resam-
+pling instead imposes an exact success ceiling that additional state
+tracking cannot overcome. Retry-enabled elimination changes the
+apparent failure threshold at an explicit tool-call cost. The contri-
+bution is an executable diagnostic instrument, analytic calibration,
+and an audit of its assumptions; a small, single-model local CPU
+study adds an exploratory model-in-the-loop check, but its 256
+tasks yielded no completed workflows for the 0.5B model. This
+floor result does not show that the task dimensions have no ef-
+fect and supports no cross-provider or reasoning-budget claim. A
+separate16-episode,two-seedfractionalfactorialwithoneCopilot-
+routedmodelcompletedhalfthetasks;itssmallsampleandaliased
+interactions make the contrasts descriptive rather than confirma-
+tory.
+KEYWORDS
+agent evaluation, task structure, dependency graphs, state reten-
+tion, experimental design
+1 INTRODUCTION
+What makes a task difficult for an agent? A long sequence may
+require little planning if each next action is obvious. A short task
+mayfailbecauseanecessaryvalueisnolongervisible.Manyavail-
+able actions need not be problematic when their preconditions are
+easy to evaluate. These cases have different remedies, yet a single
+completion score treats them alike.
+Existing work already establishes that task complexity matters.
+DyValgeneratesreasoningproblemswithcontrollablegraphstruc-
+ture[1];controlledpuzzlesexamineperformanceascompositional
+complexity increases [2]; and task depth and capability breadth
+have been studied in multi-agent evaluation [15]. More directly,
+TRAJECT-Bench varies tool-trajectory breadth and depth and re-
+ports trajectory-level selection, argument, and ordering metrics
+[10]. The Reward Hacking Benchmark studies independent and
+chained multi-step tool tasks across frontier models, including
+harder task variants [11]. SynthAPI varies tool, task, and database
+diversity in synthetic executable environments, although its ques-
+tion is training-data scaling rather than capability diagnosis [12].
+Synthetic POMDPs have also been designed with explicit, theoret-
+ically characterized memory-demand structures while preserving
+transition invariants [14]. Our remaining question is narrower:
+can a small tool-execution workflow isolate state-retention and
+feedback conditions while preserving required work and auditing
+unavoidable structural couplings?
+The scope of novelty is necessarily narrow. Controllable graph
+difficulty, reasoning-budget comparisons, tool-trajectory diag-
+nostics, multi-step tool tasks, and memory benchmarks all have
+substantial prior work [1, 2, 4–7, 9–13]. Our candidate distinc-
+tion is the combination of a fixed-work, state-mutating work-
+flow with explicit contrasts between state snapshots and history-
+reconstructible feedback, plus audits of how controller represen-
+tation changes the resulting profile. This is a testable distinction,
+not a novelty finding: neither the reference controllers nor the
+two small, single-model evaluations validate a general capability-
+profile contribution, and no direct benchmark comparison has
+been performed.
+We study four operational controls: the longest prerequisite
+chain, the number of candidates within an operation, the number
+of active state registers, and whether current register values are
+repeated in feedback. The total number of required operations is
+alwayseight.Thisisa fixed-work depth intervention:depthchanges
+precedence, not episode length. Candidate count is likewise local
+toanoperation,notthenumberofgloballyavailableactions.These
+distinctions are necessary for interpreting the experiment.
+The present study is a methods and calibration paper. All evalu-
+ated controllers are short, inspectable programs with deliberately
+restricted resources. Their failures are not surprising discoveries
+about general reasoning. Instead, they are positive and negative
+controls: an instrument that cannot distinguish a known retention
+deficit from a known scheduling deficit should not be used to di-
+agnose less interpretable systems. We now also report exploratory
+evidence from one small local model, a small Copilot-routed pilot,
+and a two-seed Copilot fractional factorial. None supports general
+capability claims.
+Our contributions are an executable fixed-work factorial task
+family; an exact audit showing which structural metrics remain
+
+PAGE 2
+fixed and which necessarily move together; and a reference-
+controller evaluation with paired uncertainty estimates and an-
+alytic success predictions, followed by controlled ablations of
+the assumptions underlying those profiles. We also report one
+local-model factorial, paired pilot traces, and a small fractional
+factorial from one Copilot-routed GPT model. We make no claim
+to introduce controlled complexity evaluation itself, to establish a
+universalfailurethreshold,or to estimatecross-model effects from
+the pilot.
+The distinction between task structure and controller represen-
+tation is especially important. Increasing the number of candidate
+slots makes serial examination expensive, but not an indexed
+lookup. Increasing the number of registers creates more values to
+retain, but a known deterministic workflow can be compiled into
+a list of future answers. Conversely, newly sampled unobserved
+values cannot be recovered by a better retention policy. A use-
+ful structural profile must say which of these cases its controls
+measure.
+2 RELATED WORK
+Controlled complexity, memory demand, and tool trajectories.Dy-
+Val uses directed acyclic graphs to generate reasoning tasks at ad-
+justable complexities [1]. Shojaee et al. use controlled puzzle en-
+vironments to study complexity-dependent performance and com-
+putation, including reasoning effort under fixed inference budgets
+[2]. MorphoBench adapts question difficulty to model capability
+and evaluates GPT and Gemini models [3]. These works establish
+that controllable difficulty and model-based scaling studies are not
+new contributions by themselves. TRAJECT-Bench varies paral-
+lel breadth and sequential depth in executable, production-style
+tool trajectories and analyzes tool selection, argument correctness,
+and ordering [10]. RHB evaluates chained tool workflows across
+13 models and tests harder variants and environmental interven-
+tions [11]. SynthAPI uses executable stateful environments and
+independently controls tool, task, and database diversity to study
+training-data composition across hundreds of thousands of tasks
+[12]. Theirobjectivesdiffer fromours, buttheir scope makes broad
+claims about the first controlled or structural tool-use benchmark
+untenable. Wang et al. provide an especially relevant precedent
+for controllable memory difficulty: their synthetic POMDPs define
+memory-demand structures and construct tunable environments
+while preserving the belief MDP [14]. Our snapshot/history con-
+trast is not a partial-observability intervention, because success-
+ful action/update history is sufficient to reconstruct the current
+registers. It measures the burden of maintaining state internally
+rather than a loss of information. The hidden-resampling exten-
+sion introduces missing information, but is currently tested only
+with programmed policies. Tang et al. analyze depth and width in
+multi-agent systems [15]; their width denotes capability diversity,
+whereas ours counts mutable registers. Our narrower candidate
+contribution is an audited, stateful execution design that separates
+retention, candidate selection, and feedback access, while measur-
+ing how controller representation changes the resulting profile.
+The current experiments validate that design with programmed
+controllers; they do not establish the profile of a language model.
+Diagnostic environments. The Behaviour Suite explicitly evalu-
+atescorecapabilitiesthroughcarefullydesignedtasks[ 16].BabyAI
+provides synthetic instruction-following levels of increasing diffi-
+culty and a heuristic expert [17]. Our reference-policy design fol-
+lows this diagnostic tradition. The workflow setting substitutes
+dependency-constrained operations for movement and makes the
+required work and failure rules directly inspectable. We have not
+experimentally compared our instrument with either platform.
+Interactive and long-horizon evaluation.𝜏-bench evaluates tool-
+agent-user interaction using final database states [18]. Kwa et
+al. measure the human-duration horizons of software tasks [19].
+Those evaluation targets differ from a fixed-work intervention
+on precedence. ARIES studies policies that transform interactive
+thought graphs [20]; it does not provide evidence for indepen-
+dence of the controls used here. The partial-observation literature
+distinguishes current observations from history-conditioned in-
+formation [21]. That distinction is central to our observation in-
+tervention: omitted snapshots do not destroy information already
+recoverable from history.
+Tool-use benchmarks and nearest overlap.API-Bank, ToolBench,
+and AppWorld evaluate tool-augmented models on runnable or
+interactive tasks, while AgentBench spans multiple interactive en-
+vironments [5–8]. MCPAgentBench is a particularly close recent
+comparison: it evaluates multi-step tool invocation and presents
+candidatetoollistswithdistractors[ 9].TRAJECT-Benchisacloser
+overlapforcontrolledtrajectorystructureandintermediatefailure
+analysis; RHB is a closer overlap for multi-step tool-use difficulty
+and model-based experiments [10, 11]. MemCalib directly bench-
+marks model use of retrieved memory, although it measures the
+influence of natural-language propositions on responses rather
+than retention of mutable workflow state [13]. Accordingly, nei-
+ther multi-step tool use, trajectory depth, candidate selection, nor
+memory evaluation is claimed as new here. Our candidate distinc-
+tion is the fixed-work state-mutating intervention and its explicit
+separation of visible snapshots from history-reconstructible state.
+We have not reimplemented or directly compared against these
+benchmark suites, and the programmed-controller and single-
+model results cannot establish that this distinction improves eval-
+uation of language models.
+Reasoning-budget evaluation. Reasoning effort and inference
+compute have already been studied as experimental variables, in-
+cluding budget-matched comparisons of reasoning strategies [4].
+The Illusion of Thinking also studies complexity-dependent rea-
+soningeffort[ 2].Theopenempiricalquestionforthisprojectisnot
+whether budget matters in general, but whether budget changes
+model performance differently across audited state-retention,
+candidate-selection, and feedback interventions. That interaction
+has not been measured in this manuscript.
+Workshop precedents. We inspected four published ALA 2025
+papers as methodological precedents, not as a systematic review
+or an empirical comparison. Lipkis and Agogino study failure-
+probability estimation and the difficulty of sampling rare out-
+comes [22]. Our exact small-task probabilities serve a different
+purpose: they expose when an empirical zero is a sampling lim-
+itation. Dynamic Thinker optimizes decision-time search with
+2
+
+PAGE 3
+compute-dependent objectives [23]. Our comparison counts ex-
+plicit local checks and preparation work; it does not reproduce
+that learned metareasoning experiment. Nourzad et al. compare
+a task-graph scheduling architecture with heuristic and random
+baselinesusingmakespanandschedulingtime[ 24].Ourscheduler
+checks ordering validity, not assignment to heterogeneous proces-
+sors or makespan optimization. Leal et al. vary deliberation cost in
+option-basedlearning[ 25];ourretryallowancechangesexecution
+opportunities, not option termination or a training objective.
+These precedents motivate reporting the concrete intervention,
+the unrestricted reference, the resource charged, and the uncer-
+tainty of the outcome. They do not establish that our task fam-
+ilyisnovel.Theclosestmethodologicaloverlapremainscontrolled
+graphgenerationanddiagnosticenvironments;theclaimedcontri-
+bution is the combined audit of stateful execution, representation-
+sensitive profiles, and recoverability.
+3 EXECUTABLE TASK DESIGN
+3.1 State, actions, and feedback
+Ataskconsistsofaprerequisitegraph 𝐺 = (𝑉 , 𝐸)with |𝑉 |= 𝑁 = 8
+operations, 𝑤 ∈{1, 2, 4, 8}active registers, and a candidate count
+𝑏 ∈{2, 4, 8}. Registers take values inZ8. The initial eight-slot ar-
+ray is sampled uniformly and shown once. Slots outside the active
+width are unused padding. Each operation𝑣 specifies a query reg-
+ister𝑞𝑣,anupdateregister 𝑢𝑣,anonzeroincrement 𝛿𝑣 ∈{1, . . . , 7},
+and a random permutation𝜎𝑣 of the codes0, . . . , 𝑏 −1.
+The sole execution tool accepts an operation identifier and can-
+didate slot:
+execute(𝑣, 𝑎).
+The action succeeds exactly when all predecessors are complete
+and
+𝜎𝑣 (𝑎)= 𝑥𝑞𝑣 mod 𝑏.
+It then marks𝑣 complete and applies𝑥𝑢𝑣 ← (𝑥𝑢𝑣 +𝛿𝑣)mod 8.
+Each active register is queried exactly𝑁 /𝑤 times; query positions
+are shuffled. Updates are sampled independently and need not
+cover every register. Node labels, initial values, update draws, and
+candidate-order draws are seeded.
+An invalid dependency or candidate terminates the episode im-
+mediately with an explicit failure category. Invalid tool arguments
+raise an error. The goal is to complete all eight operations. Thus
+every successful episode uses exactly eight execution calls. There
+is no reset, inspection tool, retry, reward shaping, or recovery al-
+lowance.
+Both feedback conditions reveal completed operations and the
+appliedregisterupdate.The snapshot conditionalsorepeatsallcur-
+rentregistervalues.The history conditionreplacestheeightvalues
+with null entries after the initial observation. Since the initial state
+and all successful updates are available, an exact history-tracking
+controller can reconstruct every value in either condition. The in-
+terventionremovesconvenientrefreshes,notrecoverableinforma-
+tion. It therefore cannot establish robustness to unobserved sto-
+chastic changes.
+Family 𝑑 Edges Masks Orders Ready nodes
+Chains 1 0 256 40320 4.02
+Chains 2 4 81 2520 2.70
+Chains 4 6 25 70 1.67
+Chains 8 7 9 1 1.00
+Barriers 1 0 256 40320 4.02
+Barriers 2 16 31 576 2.13
+Barriers 4 12 13 16 1.33
+Barriers 8 7 9 1 1.00
+Table 1: Exact structural audit at𝑁 = 8. “Masks” counts
+reachable sets of completed operations; “orders” counts suc-
+cessful operation permutations. Ready nodes are averaged
+uniformly over nonterminal reachable completion masks,
+not over a controller’s trajectories.
+3.2 Two fixed-work graph families
+Depth 𝑑 ∈{1, 2, 4, 8}is the longest prerequisite chain, measured
+in nodes. Let𝑘 = 𝑁 /𝑑. Thechains family has𝑘 disjoint chains of
+length 𝑑. The barriers family has𝑑 layers of𝑘 operations; every
+operation in a layer depends on every operation in the preceding
+layer. The two families coincide at𝑑 = 1 and 𝑑 = 𝑁 but differ at
+intermediate depths. They are a graph-topology robustness check,
+not two independent domain generators: the state and candidate
+mechanics are shared.
+Increasing depth changes precedence while preserving 𝑁 ,
+the state alphabet, candidate count, active width, and optimal
+execution-call count. Holding the seed fixed pairs node labels,
+register draws, and candidate orders across the snapshot inter-
+vention and, at fixed depth, across graph families. Across width
+and candidate levels, the same random draws are reused before
+level-specific projections. This reduces avoidable surface variation
+without asserting identical semantics across levels.
+3.3 What is and is not controlled
+We enumerate reachable completion masks and count valid sched-
+ules by dynamic programming. For chains, the mask count is(𝑑 +
+1)𝑘 ; for barriers, it is𝑑 (2𝑘 −1)+1. The numbers of valid schedules
+are respectively
+𝐿chains = 𝑁 !
+(𝑑!)𝑘 , 𝐿 barriers = (𝑘!)𝑑 .
+Table 1 shows that depth necessarily changes reachable comple-
+tion sets and scheduling freedom. Increasing local candidate count
+also multiplies the number of exposed slots across ready opera-
+tions. These are not four orthogonal graph metrics.
+For a fixed initial state, commuting additive updates make the
+register state a deterministic function of the completion mask.
+The mask audit is therefore exact for successful executions of an
+instance, but excludes failure sinks and does not claim to count
+a Cartesian product of all register assignments. Across the task
+distribution, active initial-state entropy is3𝑤 bits; the entropy of
+the code tested by a candidate islog2 𝑏 bits. Width and candidate
+3
+
+PAGE 4
+count consequently interact in decision-relevant information even
+though the register alphabet is fixed.
+The construction preserves array-slot count and the single tool
+interface. It does not preserve serialized prompt length, token
+count, edge count, global action branching, or total state-space
+size. No prompt tokens are used by the local controllers. A causal
+statementinthisstudyconcernsanoperationalinterventioninside
+this generator, including its documented couplings; it cannot be
+interpreted as an isolated effect of an abstract complexity measure.
+4 REFERENCE CONTROLLERS AND
+CALIBRATION
+All controllers consume public task rules and returned observa-
+tions. None can read simulator state. Except for the random sched-
+uler, each chooses the smallest-labelled ready operation.
+The Exact controller retains all active values and examines can-
+didatesuntilitfindsthematchingcode. Cache-2 andCache-4 retain
+only the first two or four active register values and apply public
+updates to that fixed cache. A visible snapshot may answer the
+current query even outside the cache. A missing value causes a
+uniform candidate guess. These controllers intentionally do not in-
+fer forgotten values from their successful guesses or precompute
+future answers.
+Scan-1 and Scan-4 retain all registers but examine at most one
+or four candidate slots. If none matches, they choose uniformly
+among unexamined slots.Cache-2 + Scan-4combines the two re-
+strictions.The Random schedulecontrollerretainsallvaluesandse-
+lectsuniformlyamongincompleteoperationswithoutcheckingde-
+pendencies. TheUniform candidatecontroller schedules correctly
+but guesses every candidate. These are resource-restricted algo-
+rithms, not trained agents or models of human cognition.
+Analytic predictions.Foraknownqueriedvalueandauniformly
+permuted candidate list, a controller checking𝑠 candidates has av-
+erage per-action success
+𝑝𝑠 = min{1, (𝑠 +1)/𝑏}.
+The extra one comes from the final guess. More precisely, condi-
+tional on an instance’s actual state and candidate order, success is
+one when the correct slot is among those examined and1/(𝑏 −𝑠)
+otherwise. A query outside the cache without a snapshot has prob-
+ability 1/𝑏. We multiply these instance-conditional probabilities
+along the deterministic ready schedule. The initial observation is
+visible in both conditions, so the first action is never incorrectly
+counted as a forgotten-state query. State along a successful path is
+deterministic, and new uniform guesses are independent, making
+this calculation exact for the specified policy.
+Uniform candidate success is𝑏−𝑁 . The random scheduler sam-
+ples a uniform operation permutation, yielding
+𝑃chains = (𝑑!)−𝑘, 𝑃 barriers = (𝑘!)𝑑
+𝑁 ! .
+These formulas are calibration targets rather than fitted explana-
+tions.Inparticular,critical-pathdepthalonecannotdeterminesuc-
+cess even for this simple scheduler: at𝑁 = 8, 𝑑 = 2, its probability
+is 1/16 for chains and1/70 for barriers.
+5 EXPERIMENTAL PROTOCOL
+The full design has2 ×4 ×3 ×4 ×2 = 192 cells. Each uses seeds
+0, . . . , 255 and all eight controllers, for 49,152 tasks and 393,216
+episodes. The same seed is a paired block across levels and policies.
+Repeated conditions are not treated as independent trials. The con-
+figuration and analysis rules were written before the primary run
+in a local protocol file; this is not an external preregistration.
+The primary outcome is complete task success. We also record
+completed operations, execution calls, candidate evaluations, and
+first failure type. There are no exclusions. An Exact-controller fail-
+ure aborts the run. Tests verify the full grid over additional seeds,
+match graph schedule counts against exhaustive small-graph enu-
+meration, check observation masking and public updates, and ex-
+ercise explicit invalid-action behavior.
+Within each family, a main contrast is the high-minus-low
+endpoint success-rate difference, averaged equally over every
+other level. We report all four contrasts and a specified width-by-
+observation difference-in-differences:
+𝐼𝑤,𝑜 = [𝑆 (8, history)−𝑆 (1, history)]
+−[𝑆 (8, snapshot)−𝑆 (1, snapshot)].
+The remaining controls are averaged equally in each𝑆. Percentile
+bootstrap bands use 2,000 resamples of the 256 paired seed blocks,
+with a fixed analysis seed. They are descriptive 95% bands, not si-
+multaneous significance statements. All contrast intervals and sec-
+ondary outcomes are included in the supplementary artifact.
+5.1 Separately frozen follow-on design
+After inspecting the primary results, we specified seven ablation
+grids containing 1,156 task–controller configurations (Table 2).
+Eachusesseeds 10,000, . . . , 10,255,disjointfromtheprimaryseeds,
+giving 295,936 additional episodes and 689,152 episodes overall. A
+configuration includes its controller; the count is not a count of
+distincttaskenvironments.Someanchorsdeliberatelyrecuracross
+grids, and their repetitions do not create independent evidence.
+Thesameseedispairedacrosseachexplicitlystatedcomparison.
+Changing 𝑁 necessarily changes the number of generated opera-
+tions and random draws; this is common-seed pairing, not iden-
+tical task content. Follow-on contrasts average only their stated
+anchors, not the complete primary grid. All 77 selected contrasts
+are stored, including negative and zero differences. The follow-on
+protocol was frozen locally before these runs, but after observing
+the first study; neither protocol is an external preregistration.
+We additionally compute every endpoint interaction of orders
+two through four in the original factorial data: six pairwise, four
+three-way, and one four-way interaction for each controller and
+family, or 176 estimates. These are exploratory follow-on analy-
+ses. They use signed differences of endpoint cell means, averag-
+ing all unaffected controls equally. Bands again resample paired
+seed blocks 2,000 times, with no multiplicity-adjusted or causal-
+mechanism significance claims.
+6 RESULTS
+6.1 Distinct structural profiles
+Exact succeeds on every generated task. Cache-2 averages 75.57%
+success on chains and 75.63% on barriers; Cache-4 averages 87.87%
+4
+
+PAGE 5
+Grid Intervention and anchors Configurations
+Work 𝑁 = 4, 8, 16;𝑑 = 2, 4; 𝑤 = 4; initial-only or every-step snapshots 192
+Memory 𝑁 = 16,𝑑 = 4;fixed,next-use,residue,plan,andstaleretention;initial-onlyorevery-fourth
+snapshots
+96
+Observation 𝑁 = 8,𝑑 = 4; periods0, 1, 2, 4 crossed with public updates or hidden independent resam-
+pling
+256
+Recovery 𝑁 = 8,𝑑 = 4; error allowances0, 2, 8, 56; trials with replacement or elimination; both snap-
+shot endpoints
+256
+Locality 𝑁 = 16,𝑑 = 4; balanced, clustered, or concentrated queries crossed with additive or static
+state
+192
+Selection 𝑁 = 8,𝑑 = 4, 𝑤 = 4; 𝑏 = 2, 4, 8; serial, fixed, redundant, and indexed selection; every-step
+snapshots
+36
+Labels 𝑁 = 8,𝑑 = 4; original random identifiers versus reversed identifiers; both snapshot end-
+points
+128
+Table 2: Follow-on design. Both graph families appear in every grid. Unless stated otherwise,𝑏 = 4, 8 and 𝑤 = 4, 8. Grid-specific
+controller sets and the complete configuration manifest are supplied with the artifact.
+and 87.89%. The observed Scan-1 success rates are 33.46% and
+33.52%, whereas Scan-4 reaches 67.43% and 67.38% (Table3). These
+averages reflect the chosen equal-weight grid, not a natural task
+distribution.
+The largest depth contrast belongs to the random scheduler:
+−100 percentage points from depth one to eight in each family.
+The largest candidate contrast belongs to Scan-1, also−100 points.
+Cache-2 instead loses approximately 49 points as width rises from
+one to eight. Depth has negligible effects on the correctly sched-
+uledcacheandscancontrolscomparedwiththeirresource-specific
+interventions. Small residual differences reflect instance permuta-
+tions and finite simulation rather than a general equivalence claim
+(Table4).
+6.2 Observation refreshes and candidate
+checks differ
+Both cache controllers succeed on every snapshot task, regardless
+of width. Without refreshes, Cache-2 succeeds on 51.15% of chains
+tasksaveragedacrosswidths,butonlyabout1.2%atwidtheightav-
+eraged over depth and candidate count. Its width-by-observation
+interaction is -98.80 percentage points in chains, versus−98.86 in
+barriers. The large interaction is expected: width creates no reten-
+tion deficit when the current value is directly visible. Averaging
+observation conditions conceals this failure mode.
+Increasing the scan limit changes the candidate profile but does
+notrecoveraforgottenvalue.Withfourcandidates,Scan-4always
+succeeds, while Scan-1 succeeds on fewer than 1% of tasks. With
+eight candidates, Scan-4 succeeds on 2.29% of chains tasks and
+2.15% of barriers tasks, consistent with(5/8)8 ≈2.33% averaged
+over candidate-order draws. The combined Cache-2 + Scan-4 con-
+troller remains sensitive to both width and candidate count. Addi-
+tional local checks and increased retained state are therefore non-
+interchangeable resources in this instrument.
+Thisisnotanexperimentonreasoning-tokenbudgets.Scanlim-
+its count predicate evaluations, not tokens or elapsed computa-
+tion;earlyfailuresalsoshortenepisodes.Thefollow-onredundant-
+check control matches checks per decision, not total episode com-
+putation, and supports no inference-budget conclusion.
+6.3 Calibration and rare events
+The maximum absolute discrepancy between an overall observed
+rate and its analytic prediction is 0.63 percentage points, for the
+chains random scheduler. Agreement is a useful implementation
+check, not an independent validation of external relevance.
+Atbarrierdepthtwo,zerosuccesseswereobservedalthoughthe
+exact probability is1/70. With 256 independent seeded instances
+and scheduling draws, this outcome has probability(69/70)256 ≈
+2.5%. The aggregate seed bootstrap then reports a degenerate 25%
+band because depth-one tasks always succeed and other sampled
+depths never do. It cannot resolve an unseen rare event. The Wil-
+sonintervalforthedepth-twocellextendstoapproximately1.48%,
+includingtheexact1.43%probability(Table 5).Wethereforedonot
+interpret a zero empirical rate or a zero-width bootstrap band as
+proof of impossibility. The Wilson intervals are a supplementary
+diagnostic added after observing the sparse scheduling outcomes,
+not a prespecified primary analysis.
+6.4 Interactions beyond width and snapshots
+The endpoint profiles are not additive. For the combined Cache-2 +
+Scan-4 controller, the candidate-by-width interaction is47.90 per-
+centage points in chains and48.14 in barriers; the candidate-by-
+width-by-observation interaction reaches95.02 and 95.90 points.
+Theselargesigneddifferencesarisepartlyfromceilingandflooref-
+fects: restoring a resource can matter little while another resource
+alreadypreventscompletion.Theyarenotevidenceforauniversal
+three-factor law. The full pairwise and higher-order tables are in
+the appendix, and every interval is in the accompanying data.
+7 ABLATIONS OF THE DIAGNOSTIC
+ASSUMPTIONS
+7.1 Work is not fixed-work depth
+The work grid increases𝑁 from four to sixteen while retaining
+𝑑 = 2, 4, 𝑤 = 4, and𝑏 = 4, 8. Exact succeeds throughout. Without
+repeated snapshots, Cache-2 falls from 13.43% to zero observed
+success: a paired difference of −13.43 points with a descriptive
+band [−16.02, −10.94]. With snapshots every step, the same cache
+5
+
+PAGE 6
+Family Controller Success (%) 95% interval Predicted (%)
+Barriers Exact 100.00 [100.00, 100.00] 100.00
+Barriers Cache-2 75.63 [75.51, 75.75] 75.56
+Barriers Cache-2 + Scan-4 51.06 [50.87, 51.27] 51.13
+Barriers Cache-4 87.89 [87.80, 88.00] 87.93
+Barriers Random schedule 25.00 [25.00, 25.00] 25.37
+Barriers Scan-1 33.52 [33.45, 33.61] 33.46
+Barriers Scan-4 67.38 [67.20, 67.56] 67.42
+Barriers Uniform candidate 0.11 [0.06, 0.18] 0.13
+Chains Exact 100.00 [100.00, 100.00] 100.00
+Chains Cache-2 75.57 [75.46, 75.68] 75.56
+Chains Cache-2 + Scan-4 51.18 [51.00, 51.38] 51.18
+Chains Cache-4 87.87 [87.78, 87.96] 87.93
+Chains Random schedule 25.98 [25.39, 26.66] 26.61
+Chains Scan-1 33.46 [33.40, 33.54] 33.45
+Chains Scan-4 67.43 [67.26, 67.64] 67.49
+Chains Uniform candidate 0.14 [0.07, 0.21] 0.13
+Table 3: Measured and instance-conditional predicted success. Intervals are paired seed-bootstrap bands. Degenerate bootstrap
+bands do not bound unseen rare events; Table5 provides nondegenerate binomial intervals for the sparse scheduling condition.
+1 2 4 80
+50
+100
+Dependency depth
+Success (%)
+2 4 80
+50
+100
+Candidates per operation
+1 2 4 80
+50
+100
+Active state width
+Cache-2 Cache-4 Scan-1 Scan-4 Random schedule
+Figure 1: Marginal profiles in the chains family, averaging all other controls equally. Points are simulation results, not fitted
+curves. The width panel averages snapshot and history conditions, so its roughly 50% cache floor hides the near-complete
+failure of the history-only condition at width eight. Full curves for both families are supplied.
+succeedsthroughout.Thescan-limitedcontrollerinsteadfallsfrom
+56.59% to 50.05% under either snapshot endpoint. The aggregate
+floor near 50% is an artifact of averaging four-candidate tasks,
+which Scan-4 always solves, with eight-candidate tasks, whose
+errors compound.
+This is a work intervention, not a claim that dependency depth
+and episode length are equivalent. More operations also create
+more updates and repeated queries. The graph changes because
+its layer width is 𝑁 /𝑑; any interpretation of the work contrast
+includes those effects. The original fixed-work depth experiment
+and this follow-on experiment answer different questions.
+7.2 Retention strategy and preparation
+Wecomparefixedcacheswitha next-use cachethatretainsatmost
+two registers, prioritizing their known upcoming queries. At each
+snapshot, it selects future-use registers rather than the lowest in-
+dices; a successful guess also confirms the queried value modulo
+𝑏. Public updates adjust the retained residues. Its scheduling infor-
+mation is public, but this is a stronger retention strategy than the
+deliberately non-adaptive fixed cache.
+At 𝑁 = 16 with no intermediate snapshots, both limited-cache
+strategies remain near the floor: Cache-2 has zero observed suc-
+cesses,andNext-use-2has0.05%.Withasnapshoteveryfourthsuc-
+cessful operation, Next-use-2 reaches 9.52%, compared with zero
+observed success for Cache-2. The paired difference is 9.52 points
+[7.86, 11.18]. Thus a register-count profile depends on what the
+controller retains and how refreshes are used; the result does not
+make the two-register cache generally adequate.
+Two unrestricted representation controls solve every determin-
+istic memory task. Residue-8 tracks each active value modulo𝑏,
+using 𝑤 log2 𝑏 value bits rather than3𝑤. This follows because𝑏
+divides eight: updates modulo eight preserve the residue needed
+by the candidate predicate.Precomputed plan uses the visible ini-
+tial state and public deterministic updates to compute all𝑁 fu-
+ture candidate slots before execution. It then performs 𝑁 plan
+lookups without an execution-time register cache. The log sepa-
+rately records 𝑁 plan slots and 𝑁𝑏 candidate-table preparation
+6
+
+PAGE 7
+Family Controller Depth Candidates Width History
+Barriers Exact 0.00 0.00 0.00 0.00
+Barriers Cache-2 0.02 -1.68 -49.43 -48.75
+Barriers Cache-2 + Scan-4 -0.10 -74.79 -33.32 -32.63
+Barriers Cache-4 -0.08 -0.89 -48.42 -24.21
+Barriers Random schedule -100.00 0.00 0.00 0.00
+Barriers Scan-1 0.07 -100.00 -0.23 0.00
+Barriers Scan-4 -0.36 -97.85 0.36 0.00
+Barriers Uniform candidate 0.13 -0.34 0.13 0.00
+Chains Exact 0.00 0.00 0.00 0.00
+Chains Cache-2 0.02 -1.51 -49.40 -48.85
+Chains Cache-2 + Scan-4 -0.10 -74.49 -33.32 -32.69
+Chains Cache-4 -0.08 -0.90 -48.54 -24.27
+Chains Random schedule -100.00 0.00 0.00 0.00
+Chains Scan-1 0.07 -100.00 -0.07 0.00
+Chains Scan-4 -0.36 -97.71 0.65 0.00
+Chains Uniform candidate 0.13 -0.42 0.00 0.00
+Table 4: High-minus-low main contrasts in percentage points. Depth: 8 minus 1; candidates: 8 minus 2; width: 8 minus 1;
+history: history minus snapshot. Each averages all remaining levels equally within its family. The supplement reports the
+corresponding paired intervals.
+Family 𝑑 Observed (%) Wilson interval Exact (%)
+Chains 1 100.00 [98.52, 100.00] 100.0000
+Chains 2 3.91 [2.14, 7.04] 6.2500
+Chains 4 0.00 [0.00, 1.48] 0.1736
+Chains 8 0.00 [0.00, 1.48] 0.0025
+Barriers 1 100.00 [98.52, 100.00] 100.0000
+Barriers 2 0.00 [0.00, 1.48] 1.4286
+Barriers 4 0.00 [0.00, 1.48] 0.0397
+Barriers 8 0.00 [0.00, 1.48] 0.0025
+Table 5: Random-scheduler calibration using one represen-
+tative cell per depth and family, with 256 distinct seeds.
+Other candidate, width, and observation conditions repeat
+the same scheduling draws and do not increase this effec-
+tive trial count. Wilson 95% binomial intervals retain uncer-
+tainty at zero observed successes.
+units. This is neither zero memory nor free computation: initial
+planning uses state workspace and the plan itself stores informa-
+tion.
+7.3 Snapshot cadence versus missing
+information
+Snapshot periods count successful operations, not tool attempts.
+Period zero means the initial observation only; period one repeats
+state after every success. With public deterministic updates, Ex-
+act remains at 100% for periods zero, one, two, and four. Cache-2
+reaches 0.29%, 100%, 4.64%, and 0.44%, respectively, on the𝑁 = 8
+anchors. The difference is therefore a retention and refresh effect,
+not a lack of history-conditioned information.
+We then independently resample all active registers uniformly
+after each successful operation. Feedback announces that resam-
+pling occurred but does not reveal new values unless a snapshot is
+due. Controllers invalidate stale cached values. Under initial-only
+feedback, Exact now has zero observed successes, despite its per-
+fecttrackinginthepublic-updatecondition.Withevery-stepsnap-
+shots it returns to 100%; with period two it achieves 0.29%, and
+period four produces zero observed successes.
+This case has an information bound, not merely an algorithm-
+specific failure rate. Without retries, let𝑣 = ⌈𝑁 /ℎ⌉be the number
+of visible decisions at periodℎ > 0, and let𝑣 = 1 for initial-only
+feedback. Any history-based controller has
+𝑃 (complete)≤ 𝑏−(𝑁 −𝑣).
+At each masked decision the newly resampled target code is uni-
+form, independent of the entire visible history. An otherwise ex-
+act controller attains the bound by selecting correctly at visible
+steps and guessing at masked steps. For𝑁 = 8, initial-only feed-
+back gives4−7 or 8−7, not literal impossibility. The aggregate ana-
+lytic probability across the two candidate counts is approximately
+0.0031%, explaining why a modest seed budget is unlikely to ob-
+serve success.
+7.4 Recovery changes the experiment
+In the recovery grid, an invalid candidate returns its failure cate-
+gory without changing state or marking an operation complete.
+The episode ends only when its global error allowance𝑅 is ex-
+ceeded. Successful operations still apply updates. The maximum
+executionhorizonis 𝑁 +𝑅 calls.Wecompareindependentuniform
+guesseswithcandidateelimination,whichremembersfailedcodes
+for the current operation. This extra memory and failure feedback
+must not be mistaken for additional internal reasoning.
+With eight allowed errors and initial-only snapshots, uniform
+elimination achieves 6.54% success versus 1.27% for replacement:
+a paired gain of 5.27 points[4.15, 6.49]. Cache-2 with elimination
+7
+
+PAGE 8
+reaches 44.63%. At𝑅 = 56, elimination solves every task, while
+replacement reaches 78.56%. The average elimination cost is 27.87
+calls, compared with eight for an unrestricted exact controller.
+The success of elimination at𝑅 = 𝑁 (𝑏 −1)is guaranteed, not
+an empirical discovery: no operation can require more than𝑏 −
+1 incorrect trials. For uniform replacement, the number of failed
+guesses before𝑁 successes is negative binomial. For elimination,
+failures per operation are uniform on{0, . . . , 𝑏 −1}; convolving
+those counts gives the exact finite-budget probability. The appen-
+dix states both formulas. Retry budget, error feedback, and elimi-
+nation memory together define a different task protocol from im-
+mediate termination.
+7.5 Locality and removal of state updates
+Balanced and clustered query schedules have the same active
+width and query counts. Clustering makes consecutive queries
+use the same register along the deterministic ready schedule. At
+𝑁 = 16 with public updates, Next-use-2 improves from 0.05% un-
+der balanced queries to 1.86% under clustered queries: a paired
+difference of 1.81 points[1.22, 2.44]. Reusing a confirmed residue
+can therefore help, but the controller still fails most tasks. Fixed
+Cache-2 has zero observed complete successes in both conditions;
+its progress and call counts nevertheless differ. A completion-only
+score misses that difference.
+Concentratingeveryqueryonregisterzeroyields100%forboth
+limited cache strategies. This is a deliberateinvalid width control:
+the declared width remains four or eight, but the effective queried
+widthisone.Wereportthatauditfailureinsteadofpresentingcon-
+centration as a fair improvement at fixed memory demand.
+The Stale-8 controller retains initial values but ignores updates.
+Removing updates restores it from zero observed success on bal-
+anced additive tasks to 100% on balanced static tasks; unrestricted
+tracking remains at 100% in both. This negative control confirms
+that the update mechanism matters. Static tasks are easier for this
+stale strategy, not evidence that tracking mutable state is an intrin-
+sic universal difficulty.
+7.6 Candidate indexing and redundant checks
+TheFixed-check-4 controllerevaluatesfourcandidatesperdecision
+and uses every result. TheSham-check-4 controller also evaluates
+four,butonlythefirstresultisallowedtoaffectselection;theother
+threeareredundant.Withfourcandidates,Fixed-check-4succeeds
+at 100% and Sham-check-4 at 0.59%. With eight candidates, they
+reach 1.17% and zero observed success. Sham-check-4 produces
+exactly the same action traces as Scan-1 under paired seeds, de-
+spite its higher comparison cost. Useful computation, rather than
+charged computation alone, explains the difference.
+Indexed constructs code-to-slot maps before execution and re-
+tains all required state. It succeeds at 100% for all tested candi-
+date counts, using eight execution lookups and𝑁𝑏 preparation
+entries (Table6). Branching is therefore costly for the serial-scan
+controller but not an inherent obstacle to this representation. In-
+dex preparation grows with𝑏, and we do not compare total wall
+time, energy, or token costs. The experiment is a counterexam-
+pletorepresentation-freeinterpretationofabranchingprofile,not
+proof that indexing is costless.
+7.7 Identifiers, floors, and aggregation
+Reversing the randomly assigned operation identifiers preserves
+the graph audit and Exact’s 100% success. It changes the determin-
+istic ready order and hence some queried states. Scan-4’s paired
+difference is−0.24 points [−0.59, 0.15]with initial-only feedback,
+and Cache-2’s is−0.15 [−0.49, 0.15]. This limited relabeling check
+does not establish invariance to arbitrary wording, prompts, or
+tool names. Random scheduling remains too sparse at the selected
+depth to resolve subtle differences.
+Several ablations are dominated by ceiling and floor effects.
+We retain zero-result conditions, exact probabilities where de-
+rived, and secondary progress and resource outcomes rather than
+regeneratetasksafterobservingsuccess.Thefollow-ongridiscon-
+sequently useful for checking assumptions but not calibrated for
+ranking unfamiliar agents. Aggregate percentages must always be
+accompanied by the conditions averaged into them.
+8 INTERPRETATION AND LIMITATIONS
+The experiment shows that the instrument responds selectively to
+limitations introduced by construction. It also supplies a concrete
+counterexample to using depth alone as a universal difficulty mea-
+sure: equal-depth, equal-work graphs can have different schedul-
+ing probabilities. For an unfamiliar controller, these profiles would
+be diagnostic evidence, not a unique identification of its internal
+mechanism.
+Several limitations constrain the claims. The tasks are small and
+mechanical; the single execution tool omits natural-language in-
+structions, tool discovery, and uncertain user goals. Immediate ter-
+mination in the primary protocol magnifies compounding error
+and is a design choice, not a typical feature of software workflows.
+Even the follow-on maximum of sixteen operations does not rep-
+resent long real-world workflows.
+Active register count is not a lower bound on a controller’s re-
+quired memory. A controller could retain values modulo𝑏, com-
+press state, or precompute future answers, as the new controls
+explicitly demonstrate. The restricted-cache results measure cho-
+sen strategies, not minimum memory requirements. The hidden-
+resampling extension is one extreme missing-information mecha-
+nism, not a general model of partial observation, ambiguous feed-
+back, or hidden user intent.
+The graph families share the same state mechanics and are iden-
+tical at the endpoint depths. The comparison is limited topology
+replication, not independent-domain generalization. Main con-
+trasts include documented couplings, and the equal-weight grid is
+arbitrary. The large rollout count must not be confused with an
+equally large number of independent samples. All endpoint inter-
+actions are reported, but their bootstrap bands are descriptive and
+can degenerate at rare-event floors. No fitted universal difficulty
+model or out-of-domain predictive validation is supplied.
+The next-use controller receives the same public graph as
+other controllers, but exploits future query knowledge and learns
+residues from successful trials. Its cache entry count does not in-
+clude graph metadata, readiness bookkeeping, or controller code.
+Likewise, the residue-bit counts cover stored values, not total
+8
+
+PAGE 9
+𝑏 Controller Success (%) Checks/call Build entries Lookups
+4 Exact 100.00 2.49 0 0.00
+4 Indexed 100.00 0.00 32 8.00
+4 Scan-1 0.59 1.00 0 0.00
+4 Sham-check-4 0.59 4.00 0 0.00
+4 Fixed-check-4 100.00 4.00 0 0.00
+8 Exact 100.00 4.52 0 0.00
+8 Indexed 100.00 0.00 64 8.00
+8 Scan-1 0.00 1.00 0 0.00
+8 Sham-check-4 0.00 4.00 0 0.00
+8 Fixed-check-4 1.17 4.00 0 0.00
+Table 6: Selection ablation with full snapshots. Checks per call are the aggregate comparison count divided by execution calls.
+Build entries charge candidate-table preparation separately; lookup calls are separate operations, not equivalent CPU-time
+units. Early termination changes total comparisons, so only the fixed and redundant controls match comparison counts per
+decision.
+implementation memory. Preparation entries, lookups, and predi-
+cate checks are separate operation categories; none is a hardware-
+neutral measure of compute.
+Language-model evidence is exploratory and limited to one
+Copilot-routed model pilot, a 16-episode half-fraction over two
+task seeds, and one small local-model factorial with a success
+floor. The Copilot pilot uses three paired task seeds per interven-
+tion cell, with its third seed added after inspection of the first two.
+The fractional factorial’s last episode was completed after the first
+15 outcomes had been inspected, though its prespecified condi-
+tion was unchanged. These studies use one routed model and one
+quantized 0.5B model; none includes a reasoning-budget compar-
+ison, cross-provider comparison, or transfer to real tasks. They
+cannot establish which current model breaks first, whether more
+reasoning helps, or how the profiles predict real-task performance.
+9 EXPLORATORY LANGUAGE-MODEL PILOT
+At each decision, the model received the complete public task
+description, current observation, and interaction history, then re-
+turned one JSON action. The environment validated and executed
+the action; an invalid candidate or dependency choice ended the
+task. This is a serialized text-action interface, not native provider
+function calling. Copilot Auto selected the model, recorded as
+GPT-6 Luna throughout. The account did not expose a selectable
+Gemini or Qwen route or a reasoning-effort condition. This pilot
+therefore tests one model route, not providers or inference-budget
+scaling.
+The pilot covers four paired low/high interventions in the chain
+family, with eight operations per task and three task seeds per cell.
+Thefirsttwoseeds(16episodes)wererunbeforeathirdpairedseed
+(eight episodes) was added; the latter was chosen after inspecting
+the initial outcomes. We therefore report only descriptive counts,
+without significance tests or generalization claims. Table7 reports
+the first completed run for each unique factor–level–seed cell.
+The raw log contains 29 records, including five repeated/recovery
+records excluded from the 24-episode summaries. Success was 2/3
+versus 3/3 for depth 1 versus 8, 2/3 versus 3/3 for branching 2 ver-
+sus 8, 2/3 versus 2/3 for register width 1 versus 8, and 0/3 versus
+2/3 for history versus snapshot feedback. These tiny counts are
+Intervention Level Success Mean completed 𝑛
+Depth 1 2/3 5.67 3
+Depth 8 3/3 8.00 3
+Branching 2 2/3 7.33 3
+Branching 8 3/3 8.00 3
+Register width 1 2/3 7.33 3
+Register width 8 2/3 6.33 3
+Feedback History 0/3 5.00 3
+Feedback Snapshot 2/3 5.33 3
+Table 7: Exploratory Copilot-routed GPT-6 Luna pilot. Mean
+completed operations are out of eight. Each cell has three
+task seeds; no inferential claims are warranted.
+compatible with substantial sampling uncertainty; they do not es-
+tablish that depth helps or that any factor has a stable model-level
+effect.
+9.1 Two-seed fractional-factorial follow-up
+We completed a second, separately frozen Copilot Auto study us-
+ing the same text-action interface and GPT-6 Luna route. It cov-
+ers eight conditions in a24−1 resolution-IV half fraction of depth
+(2 or 8), branching (2 or 8), register width (1 or 8), and history
+or snapshot feedback; every task requires eight operations. Two
+taskseedsyield16episodes.Thedesignisbalancedandorthogonal
+for its main-effect contrasts, but main effects remain aliased with
+three-factor interactions, and two-factor interactions are mutually
+aliased. The two-seed sample is too small for reliable uncertainty
+estimates.
+Themodelcompleted8/16workflowsand88/128requiredopera-
+tions (5.5 per task on average). Seven episodes ended in candidate-
+selection errors and one in a dependency error. The descriptive
+high-minus-low success differences were−25, +50, +25, and+50
+percentage points for depth, branching, width, and snapshot feed-
+back, respectively; mean completed-operation differences were
+−1.50, +1.50, +2.50, and+2.00. Table8 summarizes these raw con-
+trasts. The signs, including the apparent benefit of branching, are
+notabasisformechanisticinterpretation:thereareonlytwoseeds,
+9
+
+PAGE 10
+Factor Success difference Operation difference 𝑛 per level
+Depth (8 vs. 2) -25.0 pp -1.50 8
+Branching (8 vs. 2) +50.0 pp +1.50 8
+Register width (8 vs. 1) +25.0 pp +2.50 8
+Snapshot vs. history +50.0 pp +2.00 8
+Table 8: Descriptive high-minus-low contrasts in the 16-
+episode Copilot-routed fractional factorial. Eight episodes
+contribute to each factor level; each of only two task seeds
+spans four conditions per level. Main effects may be aliased
+with three-factor interactions.
+possible three-factor aliasing, and a single model route. The last of
+16 episodes was run after the first 15 outcomes had been inspected
+following an interruption; its condition and seed had already been
+specified, and the design was not changed. This exploratory result
+does not rescue the floor-level local-model factorial or establish a
+reproducible agent capability profile.
+10 EXPLORATORY LOCAL-MODEL
+FACTORIAL
+We ran a complete25 factorial of 256 tasks using the local, quan-
+tized Qwen2.5-0.5B-Instruct model [26]. The five controls were
+graph family (chains or barriers), dependency depth (2 or 8), can-
+didate count (2 or 8), active-register width (1 or 8), and feedback
+format (history or current-state snapshot). Every task required
+eight operations. Eight task seeds were paired across all 32 cells.
+The protocol, factor grid, seeds, and analysis were fixed before this
+planned run; the protocol is local rather than externally preregis-
+tered.
+The model received the complete public task specification, cur-
+rent observation, and interaction history, and returned one JSON
+action per decision. Invalid JSON or an invalid action ended the
+episodewithoutaretry.Inferenceusedllama.cppserverb12030on
+CPU, Q4_K_M weights, temperature zero, and a 64-token output
+limit [27]. No hosted provider or paid inference was used. This is
+a single, small-model evaluation, not a comparison of providers or
+reasoning budgets. The separate runtime smoke test was excluded
+from the factorial and is retained in the artifact.
+Across the planned tasks, the model completed 0/256episodes
+(0.000 success rate) and completed only 21 of 2048 required oper-
+ations (0.08 of eight per task on average). Of 277 decisions, 255
+(0.921) were strictly schema-valid JSON. The first-failure counts
+were 162 dependency errors, 54 candidate-selection errors, 18 in-
+valid actions, 16 invalid action schemas, and 6 invalid JSON out-
+puts. Median decision latency was 9.00 seconds on the local CPU.
+Table 9 reports marginal high-minus-low success differences
+and seed-cluster bootstrap intervals. All are zero because every
+condition had zero completed workflows. These degenerate inter-
+vals are a floor effect, not evidence that the structural factors have
+no effect; the model was insufficiently capable on this interface
+to resolve their effects on the success endpoint. The run therefore
+documentsafailedcalibrationofthismodel-taskpairing,notause-
+ful structural capability profile. It cannot establish generalization
+to larger or hosted models, and it does not test whether additional
+reasoning budget changes the profile.
+11 NEXT EMPIRICAL TEST
+The next study should freeze the interaction harness and task pro-
+tocol before inference; use larger paired samples; and compare
+multiple models and providers. It should record model version,
+every prompt and action, valid action rate, completed operations,
+token usage, provider-reported cost, and latency. A reasoning-
+budget intervention must use a supported, explicit budget control
+and a total-usage-matched comparison. Retries and extra tool
+calls must remain separate interventions. An independent state-
+transition family and realistic transfer tasks are necessary before
+claiming generality. The present account has a 24-episode pilot
+and a 16-episode, two-seed fractional factorial using one Auto-
+routed model, plus a local small-model run at the success floor.
+Provider-level, cross-model, and reasoning-budget comparisons
+remain uncompleted.
+12 CONCLUSION
+Structural task controls are useful only when their invariants
+and couplings are explicit. Our fixed-work workflow instrument
+distinguishes scheduling, candidate-search, and retention restric-
+tions with executable controls and exact calibration targets. The
+reference experiments show why a structural profile is more inter-
+pretable than its aggregate score, while also showing why depth,
+state width, and observation access cannot be treated as univer-
+sally independent difficulty variables.
+Thelocal-modelfactorialisafailedcalibrationofthemodel-task
+interface, not evidence that the instrument yields a generalizable
+profile: one quantized 0.5B model completed none of 256 work-
+flows, creating a floor on the success endpoint. The completed-
+operation and action-error records are useful diagnostics, but the
+zeromarginalsuccesscontrastscannotbeinterpretedasstructural
+invariance. A second, 16-episode Copilot study shows nonzero
+contrasts,buttwotaskseedsandfractional-factorialaliasingmake
+themunstabledescriptiveobservations,notevidenceofdimension-
+specific effects. Claims about larger models, provider differences,
+reasoning-budget effects, or transfer to real workflows remain
+open.
+Reproducibility and research integrity. The accompanying ar-
+tifact contains both reference-task generators, the model-pilot,
+fractional-factorial, and local-model harnesses, 35 tests, protocols,
+episode traces, provider-usage records, structural audits, anal-
+ysis scripts, generated tables, and source hashes. The 24 unique
+Copilot-routedmodelepisodesusethreepairedseedsperinterven-
+tion cell; the third seed was added after inspection of the first two,
+and five repeated/recovery records are excluded from their sum-
+maries. The Copilot fractional factorial has 16 episodes, two task
+seeds across eight planned half-fraction conditions, and 96 logged
+model calls; the final episode was completed after inspecting the
+first 15 outcomes, without changing the prespecified design. The
+separate local factorial uses one quantized Qwen2.5-0.5B model,
+eight paired seeds, and 256 planned episodes; it uses no paid in-
+ference. Copilot usage logs report 264 premium-request units and
+25.653 billion nano-AIU across the recorded smoke and pilot runs;
+10
+
+PAGE 11
+Contrast Low success High success Difference (95% interval)
+family (barriers−chains) 0/128 (0.000) 0/128 (0.000) +0.0 pp (+0.0, +0.0)
+depth (8−2) 0/128 (0.000) 0/128 (0.000) +0.0 pp (+0.0, +0.0)
+branching (8−2) 0/128 (0.000) 0/128 (0.000) +0.0 pp (+0.0, +0.0)
+width (8−1) 0/128 (0.000) 0/128 (0.000) +0.0 pp (+0.0, +0.0)
+observation (snapshot−history) 0/128 (0.000) 0/128 (0.000) +0.0 pp (+0.0, +0.0)
+Table 9: Exploratory local-model factorial. Each level contains 128 tasks. Differences are paired by task seed and averaged over
+the other factors; intervals resample the eight seed clusters.
+these are usage units, not dollars, and the account-wide quota is
+unavailable. There are no human-subject data or external-system
+actions. The artifact has not yet been deposited in a public archive.
+REFERENCES
+[1] Kaijie Zhu, Jiaao Chen, Jindong Wang, Neil Zhenqiang Gong, Diyi Yang, and
+Xing Xie. 2024. DyVal: Dynamic Evaluation of Large Language Models for Rea-
+soning Tasks. InICLR. https://arxiv.org/abs/2309.17167.
+[2] Parshin Shojaee, Iman Mirzadeh, Keivan Alizadeh, Maxwell Horton, Samy Ben-
+gio, and Mehrdad Farajtabar. 2025. The Illusion of Thinking: Understanding the
+Strengths and Limitations of Reasoning Models via the Lens of Problem Com-
+plexity. InNeurIPS. https://arxiv.org/abs/2506.06941.
+[3] Xukai Wang et al. 2026. MorphoBench: A Benchmark with Difficulty Adaptive
+to Model Reasoning. InFindings of ACL.https://aclanthology.org/2026.findings-
+acl.1171/.
+[4] Junlin Wang, Siddhartha Jain, Dejiao Zhang, Baishakhi Ray, Varun Kumar, and
+Ben Athiwaratkun. 2024. Reasoning in Token Economies: Budget-Aware Eval-
+uation of LLM Reasoning Strategies. InEMNLP. https://aclanthology.org/2024.
+emnlp-main.1112/.
+[5] Minghao Li et al. 2023. API-Bank: A Comprehensive Benchmark for Tool-
+Augmented LLMs. InEMNLP. https://arxiv.org/abs/2304.08244.
+[6] Yujia Qin et al. 2023. ToolLLM: Facilitating Large Language Models to Master
+16000+ Real-world APIs.arXiv:2307.16789. https://arxiv.org/abs/2307.16789.
+[7] Harsh Trivedi et al. 2024. AppWorld: A Controllable World of Apps and Peo-
+ple for Benchmarking Interactive Coding Agents. InACL. https://arxiv.org/abs/
+2407.18901.
+[8] Xiao Liu et al. 2024. AgentBench: Evaluating LLMs as Agents. InICLR. https:
+//arxiv.org/abs/2308.03688.
+[9] Zixiang Liu et al. 2026. MCPAgentBench: A Real-world Task Benchmark for
+Evaluating LLM Agent MCP Tool Use. InProceedings of the Second Workshop for
+Research on Agent Language Models. https://aclanthology.org/2026.realm-1.51/.
+[10] Pengfei He et al. 2025. TRAJECT-Bench: A Trajectory-Aware Benchmark for
+EvaluatingAgenticToolUse. arXiv:2510.04550.https://arxiv.org/abs/2510.04550.
+[11] KunvarThamanetal.2026.RewardHackingBenchmark:MeasuringExploitsin
+LLM Agents with Tool Use. InICML. https://arxiv.org/abs/2605.02964.
+[12] Andrew Szot et al. 2026. Scaling Laws for Tool-Use Agents via Controllable En-
+vironment Synthesis.arXiv:2610.37648. https://arxiv.org/abs/2610.37648.
+[13] Ruike Cao et al. 2026. MemCalib: Benchmarking and Optimizing Memory Use
+in LLM Agents.arXiv:2609.24259. https://arxiv.org/abs/2609.24259.
+[14] Yongyi Wang, Lingfeng Li, Bozhou Chen, Ang Li, Hanyu Liu, Qirui Zheng,
+Xionghui Yang, and Wenxin Li. 2026. Synthetic POMDPs to Challenge Memory-
+AugmentedRL:MemoryDemandStructureModeling. Frontiers of Computer Sci-
+ence. https://arxiv.org/abs/2508.04282.
+[15] Bohan Tang, Huidong Liang, Keyue Jiang, and Xiaowen Dong. 2025. On the
+Importance of Task Complexity in Evaluating LLM-Based Multi-Agent Systems.
+arXiv:2510.04311. https://arxiv.org/abs/2510.04311.
+[16] Ian Osband et al. 2019. Behaviour Suite for Reinforcement Learning.
+arXiv:1908.03568. https://arxiv.org/abs/1908.03568.
+[17] Maxime Chevalier-Boisvert, Dzmitry Bahdanau, Salem Lahlou, Lucas Willems,
+Chitwan Saharia, Thien Huu Nguyen, and Yoshua Bengio. 2019. BabyAI: A Plat-
+form to Study the Sample Efficiency of Grounded Language Learning. InICLR.
+https://arxiv.org/abs/1810.08272.
+[18] Shunyu Yao, Noah Shinn, Pedram Razavi, and Karthik Narasimhan. 2024.𝜏-
+bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains.
+arXiv:2406.12045. https://arxiv.org/abs/2406.12045.
+[19] ThomasKwaetal.2025.MeasuringAIAbilitytoCompleteLongSoftwareTasks.
+In NeurIPS. https://arxiv.org/abs/2503.14499.
+[20] Pedro Gimenes, Zeyu Cao, Jeffrey Wong, and Yiren Zhao. 2025. ARIES: Au-
+tonomous Reasoning with LLMs on Interactive Thought Graph Environments.
+arXiv:2502.21208. https://arxiv.org/abs/2502.21208.
+[21] LesliePackKaelbling,MichaelL.Littman,andAnthonyR.Cassandra.1998.Plan-
+ning and Acting in Partially Observable Stochastic Domains.Artificial Intelli-
+gence 101, 1–2, 99–134.https://doi.org/10.1016/S0004-3702(98)00023-X.
+[22] RoryLipkisandAdrianAgogino.2025.FailureAnalysisofAutonomousSystems
+with RL-Guided MCMC Sampling. InAdaptive and Learning Agents Workshop.
+https://ala-workshop.github.io/papers/ALA2025_paper_45.pdf.
+[23] Kevin A. Wang, Jerry Xia, Stephen Chung, and Amy Greenwald. 2025. Dy-
+namic Thinker: Optimizing Decision-Time Planning with Costly Compute. In
+Adaptive and Learning Agents Workshop.https://ala-workshop.github.io/papers/
+ALA2025_paper_44.pdf.
+[24] Narjes Nourzad, Jared Coleman, Zhongyuan Zhao, Bhaskar Krishnamachari,
+Gunjan Verma, and Santiago Segarra. 2025. Actor-Twin Framework for Task
+Graph Scheduling. In Adaptive and Learning Agents Workshop. https://ala-
+workshop.github.io/papers/ALA2025_paper_17.pdf.
+[25] Augusto Leal, Mateus Begnini Melchiades, and Gabriel de Oliveira Ramos. 2025.
+A Flexible Approach to Deliberation Cost in the Option-Critic Architecture. In
+Adaptive and Learning Agents Workshop.https://ala-workshop.github.io/papers/
+ALA2025_paper_28.pdf.
+[26] An Yang et al. 2024. Qwen2.5 Technical Report.arXiv:2412.15115. https://arxiv.
+org/abs/2412.15115.
+[27] ggml-org. 2026. llama.cpp, release b12030.https://github.com/ggml-org/llama.
+cpp/releases/tag/b12030.
+11
+
+PAGE 12
+A COMPLETE EXPERIMENTAL SPECIFICATION
+The primary experiment and follow-on experiment are separately recorded. The primary grid uses𝑁 = 8, depths {1, 2, 4, 8}, candidate
+counts {2, 4, 8}, active widths{1, 2, 4, 8}, both snapshot endpoints, and both graph families. Its seeds are 0–255 and each task is evaluated by
+eight programmed controllers. The follow-on grids use the anchors in the main-text ablation design; their full per-controller configurations
+are inresults_extended/case_design.json.
+Pairing and randomness. The base generator draws a fixed eight-slot initial array, a permutation of operation identifiers, a shuffled
+balancedqueryassignment,updateregisters,nonzeroincrements,andcandidatepermutations.Candidate-countlevelsfilterthesameeight-
+code permutation; active-width levels project query and update indices into the active width. Across work levels, different numbers of
+operations cause different subsequent random draws, so seed pairing is not exact surface matching. Hidden resampling uses a separate
+seeded random stream, draws eight fresh values after each success, and replaces only active registers. Failed trials never advance that
+stream.Controllersamplingusesitsownstream.Commoncontrollerseedspairvariants,butdifferingcontrollerlogiccanconsumedifferent
+numbers of draws. These choices are intended for reproducibility, not to certify statistical independence of every repeated condition.
+Admission and positive controls.Thereisnooutcome-basedrejectionorregeneration.Allbalancedtasksmustqueryeveryactiveregister;
+clustered assignments preserve that coverage and its multiplicities. Concentrated-query variants explicitly have effective width one and are
+tagged as a degenerate manipulation. Positive controls include unrestricted deterministic tracking, residue tracking, deterministic preplan-
+ning, unrestricted tracking with a snapshot after every hidden resampling, and candidate elimination with the worst-case error allowance.
+The runner aborts if a designated positive control fails, if the call horizon is exceeded, or if the adaptive cache exceeds two entries. Analytic
+probabilities are derived only for supported cases; unsupported predictions are labellednot_derived, not replaced with a default or fitted
+estimate.
+Adaptive-cache details.Next-use-2 uses the public deterministic ready schedule to prioritize registers queried in the future. On a visible
+snapshot,thecurrentquerycanbeanswereddirectly,sofuture-useselectionskipsthatoperation.Duringhistory-onlyfeedback,asuccessful
+action confirms the queried residue from the chosen candidate code. The controller inserts that residue, applies the public increment if
+relevant,andevictsvalueswhosenextuseisfurthestaway.Thisisnotagenericlearnedmemorystrategy;future-querymetadata,successful-
+action feedback, and public updates are deliberate advantages of the control.
+Preparation and storage accounting.Residue caches store values modulo𝑏; raw-value caches store values modulo eight. Reported value
+bitsexcludedictionarykeys,graphmetadata,controllercode,temporaryoperands,andruntimeoverhead.Preplanningrecords 𝑁 candidate
+slots, using the initial state as preparation workspace; indexed selection records𝑁 maps of𝑏 code-to-slot entries. The preparation counter
+charges 𝑁𝑏 table entries for each of these representations. It is a workload proxy, not a measurement of exact executed CPU instructions
+or comparison count in Python’sindex function. Lookup counts are kept separate from predicate comparisons. The experiment does not
+aggregate these categories into an invented universal compute unit.
+B CALIBRATION DERIVATIONS
+B.1 Completion states and schedule probabilities
+For𝑘 = 𝑁 /𝑑 disjoint chains, a completion set is determined by the completed prefix length0, . . . , 𝑑 of each chain, giving(𝑑 +1)𝑘 reachable
+masks. Each chain imposes one internal order on its𝑑 operations; interleaving the𝑘 orders gives𝑁 !/(𝑑!)𝑘 valid permutations. A uniformly
+sampled operation permutation therefore succeeds with probability(𝑑!)−𝑘 .
+For barriers, all previous layers must be complete before any operation in the next layer succeeds. Each of the𝑑 layers contributes2𝑘 −1
+nonempty partial-completion choices, with one initial empty mask, giving𝑑 (2𝑘 −1)+ 1 distinct masks. Each layer’s operations can be
+internally permuted in𝑘! ways, so the valid-order count is(𝑘!)𝑑 and random-order success is(𝑘!)𝑑 /𝑁 !. Failed-action sinks are not included
+in these completion-mask counts.
+B.2 Deterministic history and residue sufficiency
+Let𝐶𝑡 be the completed-operation set after𝑡 successes. Because each update is additive and public,
+𝑥𝑟 (𝑡)= 𝑥𝑟 (0)+
+∑
+𝑣∈𝐶𝑡 :𝑢𝑣 =𝑟
+𝛿𝑣 (mod 8).
+Thus the initial observation and successful-action history determine every register exactly. Repeating snapshots cannot improve optimal
+information availability in this deterministic protocol, although it can help a restricted retention strategy. Since each tested𝑏 divides eight,
+the same equation modulo𝑏 determines every candidate predicate. Tracking𝑥𝑟 mod 𝑏 is therefore sufficient; storing all three raw value
+bits is not necessary for𝑏 = 2 or𝑏 = 4.
+A known ready schedule can also be simulated once using the initial observation. Recording its future candidate slots is an exact plan in
+the deterministic protocol. That construction establishes an alternative representation, not a lower bound on memory and not a claim that
+planning uses less total storage or preparation.
+12
+
+PAGE 13
+B.3 Missing-information ceiling
+In the hidden-resampling condition, all active values are freshly uniform after each success. Before a masked decision, conditioning on any
+visiblehistorystillleavesthequeriedcodeuniformon 0, . . . , 𝑏 −1.Choosingadifferentreadyoperationcannotchangethisfact,becauseevery
+active register has the same independent fresh distribution. Consequently, the conditional probability of each hidden decision succeeding
+is at most1/𝑏, regardless of additional computation.
+With no retries, the number of visible decisions on a successful path is𝑣 = ⌈𝑁 /ℎ⌉for snapshot periodℎ > 0, or𝑣 = 1 for initial-only
+feedback. Applying the chain rule gives𝑃 (complete) ≤𝑏−(𝑁 −𝑣). An unrestricted exact controller attains this ceiling. The bound does
+not apply unchanged to recovery protocols: failed trials preserve state and provide information that can support elimination. For scan-
+limited controllers, formulas that average visible candidate-order draws are ensemble predictions and are labelled separately from exact
+instance-conditional predictions.
+B.4 Finite retry budgets
+Uniform replacement guesses have success probability𝑝 = 1/𝑏 per attempt. If𝐹 is the number of errors before𝑁 successes, then
+Pr(𝐹 ≤𝑅)=
+𝑅∑
+𝑟=0
+(𝑁 +𝑟 −1
+𝑟
+)
+𝑝𝑁 (1 −𝑝)𝑟 .
+Under uniform elimination, the correct code has a uniformly random rank in a permutation of the𝑏 candidates. Errors per operation are
+therefore independent uniform counts on{0, . . . , 𝑏 −1}. The finite-budget probability is
+Pr(𝐹 ≤𝑅)= 1
+𝑏𝑁
+𝑅∑
+𝑟=0
+[𝑧𝑟 ](1 +𝑧 +···+ 𝑧𝑏−1)𝑁 .
+The implementation evaluates this coefficient sum by a truncated convolution. If𝑅 ≥𝑁 (𝑏 −1)the probability is one. Mean calls without
+budget exhaustion are𝑁𝑏 for replacement and𝑁 (𝑏 +1)/2 for elimination. These are exact properties of the selected guessing policies, not
+general guarantees for arbitrary tool-using controllers.
+C ALL FOLLOW-ON OUTCOME SUMMARIES
+Each row below averages equally over the remaining anchors of its grid. Low and high are descriptive 95% percentile bands from 2,000
+paired seed-block bootstrap resamples. They are not simultaneous confidence statements. Constants produce degenerate bands; a sampled
+zero is not a proof of zero probability. Calls include failed attempts and stop at termination. For exact analytic predictions, progress, error
+counts, comparison counts, preparation workload, lookups, and cache measurements, seeresults_extended/summary.csv. All 77 paired
+contrast estimates and their bands are inresults_extended/paired_contrasts.csv.
+Condition notation usesn for operation count,p for snapshot period,r for global error allowance, andshock1 for independent hidden
+resampling. Period zero means initial-only state feedback. Thereverse flag indicates operation identifier reversal. All grids use both graph
+families.
+C.1 Operation Count
+Condition Controller Success (%) Low High Calls
+n16_p0 Cache-2 0.00 0.00 0.00 3.38
+n16_p0 Exact 100.00 100.00 100.00 16.00
+n16_p0 Random schedule 0.00 0.00 0.00 1.69
+n16_p0 Scan-4 50.05 50.00 50.15 9.44
+n16_p1 Cache-2 100.00 100.00 100.00 16.00
+n16_p1 Exact 100.00 100.00 100.00 16.00
+n16_p1 Random schedule 0.00 0.00 0.00 1.69
+n16_p1 Scan-4 50.05 50.00 50.15 9.44
+n4_p0 Cache-2 13.43 10.94 16.21 2.93
+n4_p0 Exact 100.00 100.00 100.00 4.00
+n4_p0 Random schedule 10.94 8.11 13.96 1.60
+n4_p0 Scan-4 56.59 54.88 58.50 3.13
+n4_p1 Cache-2 100.00 100.00 100.00 4.00
+n4_p1 Exact 100.00 100.00 100.00 4.00
+n4_p1 Random schedule 10.94 8.01 13.96 1.60
+n4_p1 Scan-4 56.59 54.88 58.40 3.13
+n8_p0 Cache-2 0.73 0.29 1.22 3.17
+n8_p0 Exact 100.00 100.00 100.00 8.00
+n8_p0 Random schedule 1.17 0.49 1.95 1.63
+13
+
+PAGE 14
+Condition Controller Success (%) Low High Calls
+n8_p0 Scan-4 50.59 50.24 51.03 5.18
+n8_p1 Cache-2 100.00 100.00 100.00 8.00
+n8_p1 Exact 100.00 100.00 100.00 8.00
+n8_p1 Random schedule 1.17 0.49 1.95 1.63
+n8_p1 Scan-4 50.59 50.20 51.03 5.18
+C.2 Retention Strategy
+Condition Controller Success (%) Low High Calls
+p0 Next-use-2 0.05 0.00 0.15 5.05
+p0 Cache-2 0.00 0.00 0.00 2.98
+p0 Cache-4 50.00 50.00 50.00 9.66
+p0 Residue-8 100.00 100.00 100.00 16.00
+p0 Precomputed plan 100.00 100.00 100.00 16.00
+p0 Stale-8 0.00 0.00 0.00 4.20
+p4 Next-use-2 9.52 7.86 11.28 7.68
+p4 Cache-2 0.00 0.00 0.00 3.10
+p4 Cache-4 50.00 50.00 50.00 9.76
+p4 Residue-8 100.00 100.00 100.00 16.00
+p4 Precomputed plan 100.00 100.00 100.00 16.00
+p4 Stale-8 2.98 2.05 4.05 5.33
+C.3 Snapshot Cadence and Hidden Resampling
+Condition Controller Success (%) Low High Calls
+p0_shock0 Cache-2 0.29 0.05 0.59 2.85
+p0_shock0 Exact 100.00 100.00 100.00 8.00
+p0_shock0 Scan-4 50.68 50.34 51.12 5.18
+p0_shock0 Uniform 0.00 0.00 0.00 1.25
+p0_shock1 Cache-2 0.00 0.00 0.00 2.25
+p0_shock1 Exact 0.00 0.00 0.00 2.25
+p0_shock1 Scan-4 0.00 0.00 0.00 2.01
+p0_shock1 Uniform 0.00 0.00 0.00 1.25
+p1_shock0 Cache-2 100.00 100.00 100.00 8.00
+p1_shock0 Exact 100.00 100.00 100.00 8.00
+p1_shock0 Scan-4 50.68 50.34 51.12 5.18
+p1_shock0 Uniform 0.00 0.00 0.00 1.25
+p1_shock1 Cache-2 100.00 100.00 100.00 8.00
+p1_shock1 Exact 100.00 100.00 100.00 8.00
+p1_shock1 Scan-4 50.98 50.54 51.46 5.25
+p1_shock1 Uniform 0.00 0.00 0.00 1.25
+p2_shock0 Cache-2 4.64 3.66 5.71 3.58
+p2_shock0 Exact 100.00 100.00 100.00 8.00
+p2_shock0 Scan-4 50.68 50.34 51.17 5.18
+p2_shock0 Uniform 0.00 0.00 0.00 1.25
+p2_shock1 Cache-2 0.29 0.05 0.59 2.49
+p2_shock1 Exact 0.29 0.05 0.59 2.49
+p2_shock1 Scan-4 0.24 0.05 0.54 2.21
+p2_shock1 Uniform 0.00 0.00 0.00 1.25
+p4_shock0 Cache-2 0.44 0.20 0.73 2.93
+p4_shock0 Exact 100.00 100.00 100.00 8.00
+p4_shock0 Scan-4 50.68 50.29 51.07 5.18
+p4_shock0 Uniform 0.00 0.00 0.00 1.25
+p4_shock1 Cache-2 0.00 0.00 0.00 2.27
+p4_shock1 Exact 0.00 0.00 0.00 2.27
+p4_shock1 Scan-4 0.00 0.00 0.00 2.03
+p4_shock1 Uniform 0.00 0.00 0.00 1.25
+14
+
+PAGE 15
+C.4 Recovery and Candidate Elimination
+Condition Controller Success (%) Low High Calls
+r0_p0 Cache-2 + eliminate 0.29 0.05 0.59 2.85
+r0_p0 Scan-1 + eliminate 0.29 0.10 0.54 1.64
+r0_p0 Uniform 0.00 0.00 0.00 1.25
+r0_p0 Eliminate 0.00 0.00 0.00 1.25
+r0_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r0_p1 Scan-1 + eliminate 0.29 0.10 0.54 1.64
+r0_p1 Uniform 0.00 0.00 0.00 1.25
+r0_p1 Eliminate 0.00 0.00 0.00 1.25
+r2_p0 Cache-2 + eliminate 3.52 2.59 4.49 5.86
+r2_p0 Scan-1 + eliminate 2.93 2.10 3.76 5.11
+r2_p0 Uniform 0.05 0.00 0.15 3.72
+r2_p0 Eliminate 0.00 0.00 0.00 3.92
+r2_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r2_p1 Scan-1 + eliminate 2.93 2.10 3.81 5.11
+r2_p1 Uniform 0.05 0.00 0.15 3.72
+r2_p1 Eliminate 0.00 0.00 0.00 3.92
+r56_p0 Cache-2 + eliminate 100.00 100.00 100.00 18.94
+r56_p0 Scan-1 + eliminate 100.00 100.00 100.00 21.52
+r56_p0 Uniform 78.56 76.61 80.52 43.27
+r56_p0 Eliminate 100.00 100.00 100.00 27.87
+r56_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r56_p1 Scan-1 + eliminate 100.00 100.00 100.00 21.52
+r56_p1 Uniform 78.56 76.71 80.47 43.27
+r56_p1 Eliminate 100.00 100.00 100.00 27.87
+r8_p0 Cache-2 + eliminate 44.63 42.77 46.39 13.63
+r8_p0 Scan-1 + eliminate 43.07 41.75 44.38 12.81
+r8_p0 Uniform 1.27 0.78 1.81 11.09
+r8_p0 Eliminate 6.54 5.42 7.67 12.64
+r8_p1 Cache-2 + eliminate 100.00 100.00 100.00 8.00
+r8_p1 Scan-1 + eliminate 43.07 41.75 44.43 12.81
+r8_p1 Uniform 1.27 0.78 1.81 11.09
+r8_p1 Eliminate 6.54 5.42 7.67 12.64
+C.5 Query Locality and State Updates
+Condition Controller Success (%) Low High Calls
+balanced_additive Next-use-2 0.05 0.00 0.15 5.05
+balanced_additive Cache-2 0.00 0.00 0.00 2.98
+balanced_additive Exact 100.00 100.00 100.00 16.00
+balanced_additive Stale-8 0.00 0.00 0.00 4.20
+balanced_static Next-use-2 0.05 0.00 0.15 5.05
+balanced_static Cache-2 0.00 0.00 0.00 3.04
+balanced_static Exact 100.00 100.00 100.00 16.00
+balanced_static Stale-8 100.00 100.00 100.00 16.00
+clustered_additive Next-use-2 1.86 1.32 2.44 7.67
+clustered_additive Cache-2 0.00 0.00 0.00 7.26
+clustered_additive Exact 100.00 100.00 100.00 16.00
+clustered_additive Stale-8 0.15 0.00 0.39 4.80
+clustered_static Next-use-2 1.76 1.17 2.34 7.68
+clustered_static Cache-2 0.00 0.00 0.00 7.24
+clustered_static Exact 100.00 100.00 100.00 16.00
+clustered_static Stale-8 100.00 100.00 100.00 16.00
+concentrated_additive Next-use-2 100.00 100.00 100.00 16.00
+concentrated_additive Cache-2 100.00 100.00 100.00 16.00
+concentrated_additive Exact 100.00 100.00 100.00 16.00
+concentrated_additive Stale-8 9.42 6.93 12.11 7.21
+concentrated_static Next-use-2 100.00 100.00 100.00 16.00
+15
+
+PAGE 16
+Condition Controller Success (%) Low High Calls
+concentrated_static Cache-2 100.00 100.00 100.00 16.00
+concentrated_static Exact 100.00 100.00 100.00 16.00
+concentrated_static Stale-8 100.00 100.00 100.00 16.00
+C.6 Candidate Selection and Resource Controls
+Condition Controller Success (%) Low High Calls
+b2 Exact 100.00 100.00 100.00 8.00
+b2 Indexed 100.00 100.00 100.00 8.00
+b2 Scan-1 100.00 100.00 100.00 8.00
+b2 Sham-check-4 100.00 100.00 100.00 8.00
+b2 Scan-2 100.00 100.00 100.00 8.00
+b2 Fixed-check-4 100.00 100.00 100.00 8.00
+b4 Exact 100.00 100.00 100.00 8.00
+b4 Indexed 100.00 100.00 100.00 8.00
+b4 Scan-1 0.59 0.00 1.37 2.00
+b4 Sham-check-4 0.59 0.00 1.37 2.00
+b4 Scan-2 9.18 6.64 12.11 3.55
+b4 Fixed-check-4 100.00 100.00 100.00 8.00
+b8 Exact 100.00 100.00 100.00 8.00
+b8 Indexed 100.00 100.00 100.00 8.00
+b8 Scan-1 0.00 0.00 0.00 1.25
+b8 Sham-check-4 0.00 0.00 0.00 1.25
+b8 Scan-2 0.00 0.00 0.00 1.61
+b8 Fixed-check-4 1.17 0.20 2.34 2.39
+C.7 Operation Identifiers
+Condition Controller Success (%) Low High Calls
+reverse0_p0 Cache-2 0.29 0.05 0.59 2.85
+reverse0_p0 Exact 100.00 100.00 100.00 8.00
+reverse0_p0 Random schedule 0.00 0.00 0.00 1.29
+reverse0_p0 Scan-4 50.68 50.34 51.12 5.18
+reverse0_p1 Cache-2 100.00 100.00 100.00 8.00
+reverse0_p1 Exact 100.00 100.00 100.00 8.00
+reverse0_p1 Random schedule 0.00 0.00 0.00 1.29
+reverse0_p1 Scan-4 50.68 50.29 51.12 5.18
+reverse1_p0 Cache-2 0.15 0.00 0.34 2.88
+reverse1_p0 Exact 100.00 100.00 100.00 8.00
+reverse1_p0 Random schedule 0.00 0.00 0.00 1.35
+reverse1_p0 Scan-4 50.44 50.15 50.83 5.23
+reverse1_p1 Cache-2 100.00 100.00 100.00 8.00
+reverse1_p1 Exact 100.00 100.00 100.00 8.00
+reverse1_p1 Random schedule 0.00 0.00 0.00 1.35
+reverse1_p1 Scan-4 50.44 50.10 50.83 5.23
+D ALL ENDPOINT INTERACTION ESTIMATES
+The following estimates are exploratory follow-on analyses of the original 192-cell factorial experiment.𝐷, 𝐵,𝑊 , 𝑂 denote depth, candidate
+count, active width, and history-only versus snapshot feedback. Endpoint contrasts use high minus low for each participating dimension
+and average all nonparticipating controls over their original levels. A pairwise interaction is a difference-in-differences; the corresponding
+signed construction generalizes to orders three and four. Values are percentage points, so an interaction is not itself a success probability.
+Per-estimate bootstrap bands are retained inresults_extended/all_endpoint_interactions.csv.
+16
+
+PAGE 17
+Family Controller 𝐷 × 𝐵 𝐷 × 𝑊 𝐷 × 𝑂 𝐵 × 𝑊 𝐵 × 𝑂 𝑊 × 𝑂
+Barriers exact 0.00 0.00 0.00 0.00 0.00 0.00
+Barriers memory2 -0.10 0.10 0.10 -2.05 -2.05 -97.95
+Barriers memory2_scan4 0.49 -1.27 0.10 48.93 47.56 -50.68
+Barriers memory4 0.68 -0.68 -0.68 -4.00 -4.00 -95.61
+Barriers random_order 0.00 0.00 0.00 0.00 0.00 0.00
+Barriers scan1 0.00 0.00 0.00 0.00 0.00 0.00
+Barriers scan4 -0.59 0.59 0.00 2.93 0.00 0.00
+Barriers uniform -0.59 0.98 0.00 -0.59 0.00 0.00
+Chains exact 0.00 0.00 0.00 0.00 0.00 0.00
+Chains memory2 -0.10 0.10 0.10 -2.05 -2.05 -97.95
+Chains memory2_scan4 0.49 -1.27 0.10 48.93 47.56 -50.68
+Chains memory4 0.68 -0.68 -0.68 -4.00 -4.00 -95.61
+Chains random_order 0.00 0.00 0.00 0.00 0.00 0.00
+Chains scan1 0.00 0.00 0.00 0.00 0.00 0.00
+Chains scan4 -0.59 0.59 0.00 2.93 0.00 0.00
+Chains uniform -0.59 0.98 0.00 -0.59 0.00 0.00
+Family Controller 𝐷 × 𝐵 ×𝑊 𝐷 × 𝐵 × 𝑂 𝐷 ×𝑊 × 𝑂 𝐵 ×𝑊 × 𝑂 𝐷 × 𝐵 ×𝑊 × 𝑂
+Barriers exact 0.00 0.00 0.00 0.00 0.00
+Barriers memory2 -0.20 -0.20 0.20 -4.10 -0.39
+Barriers memory2_scan4 -1.37 1.37 0.20 95.12 2.73
+Barriers memory4 1.37 1.37 -1.37 -8.01 2.73
+Barriers random_order 0.00 0.00 0.00 0.00 0.00
+Barriers scan1 0.00 0.00 0.00 0.00 0.00
+Barriers scan4 1.17 0.00 0.00 0.00 0.00
+Barriers uniform -1.95 0.00 0.00 0.00 0.00
+Chains exact 0.00 0.00 0.00 0.00 0.00
+Chains memory2 -0.20 -0.20 0.20 -4.10 -0.39
+Chains memory2_scan4 -1.37 1.37 0.20 95.12 2.73
+Chains memory4 1.37 1.37 -1.37 -8.01 2.73
+Chains random_order 0.00 0.00 0.00 0.00 0.00
+Chains scan1 0.00 0.00 0.00 0.00 0.00
+Chains scan4 1.17 0.00 0.00 0.00 0.00
+Chains uniform -1.95 0.00 0.00 0.00 0.00
+17
+
+PAGE 18
+E WORKSHOP COMPARISON AND SUBMISSION SCOPE
+We inspected four ALA 2025 papers as a purposive sample, not all workshop papers and not a systematic novelty search. Their total PDF
+lengths are nine pages (failure sampling), ten (Dynamic Thinker), ten (task-graph scheduling), and eight (deliberation cost). References
+begin on pages nine, eight, seven, and eight, respectively. Total PDF length therefore does not equal the allowed main-text length.
+The historical ALA 2025 call allows original work up to eight pages excluding references, and preliminary or outlook papers up to
+six pages. It specifies double-blind review and deanonymized camera-ready copies. Our expanded authored version is a preprint-style
+manuscript with an appendix; the separatereview.tex source removes the author block and appendix, but must still be checked against
+the current workshop’s track and page rules. A longer document is not evidence of acceptance or of a stronger contribution. No current-
+edition acceptance, conference metadata, or submission date is asserted.
+F REPRODUCTION AND EVIDENCE BOUNDARIES
+The benchmark, controllers, tests, and analysis use the Python standard library. Document inspection additionally uses the pinned PDF
+packages. From the project directory in a Windows PowerShell terminal:
+.\.venv\Scripts\python.exe -m unittest -v test_benchmark test_extended
+.\.venv\Scripts\python.exe run_experiments.py --seeds 256
+.\.venv\Scripts\python.exe analyze.py
+.\.venv\Scripts\python.exe run_extended.py
+.\.venv\Scripts\python.exe analyze_extended.py
+.\build.ps1
+.\.venv\Scripts\python.exe verify_artifact.py
+.\.venv\Scripts\python.exe package_artifact.py
+Re-running the primary experiment replaces its generated records; the source and protocol hashes must match the supplied metadata
+when reproducing that study. The original and follow-on episode files have separate hashes and execution metadata. The two locally frozen
+protocolsandthetimeorderingofexploratoryanalysesareretainedexplicitly.Completeprimarycontrasts,rare-schedulerWilsonintervals,
+and example traces remain available in the original result directory.
+This artifact contains only programmed-controller evidence. No frontier model, learned policy, training run, provider reasoning-budget
+intervention, human participant, or realistic transfer task has been evaluated. Source compilation and local reproducibility do not establish
+arXiv moderation approval, workshop acceptance, or compatibility with a particular submission processor. The author must review the
+manuscript and current submission rules before uploading it.
+18

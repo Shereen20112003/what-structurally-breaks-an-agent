@@ -1,0 +1,586 @@
+{
+  "task": {
+    "config": {
+      "family": "chains",
+      "depth": 4,
+      "branching": 4,
+      "width": 4,
+      "observation": "history",
+      "n": 8
+    },
+    "seed": 17,
+    "initial": [
+      6,
+      4,
+      5,
+      4,
+      2,
+      4,
+      1,
+      0
+    ],
+    "nodes": [
+      {
+        "prerequisites": [],
+        "query": 3,
+        "update": 3,
+        "delta": 6,
+        "options": [
+          1,
+          2,
+          3,
+          0
+        ]
+      },
+      {
+        "prerequisites": [],
+        "query": 2,
+        "update": 1,
+        "delta": 5,
+        "options": [
+          1,
+          2,
+          3,
+          0
+        ]
+      },
+      {
+        "prerequisites": [
+          1
+        ],
+        "query": 3,
+        "update": 1,
+        "delta": 6,
+        "options": [
+          0,
+          3,
+          2,
+          1
+        ]
+      },
+      {
+        "prerequisites": [
+          5
+        ],
+        "query": 2,
+        "update": 3,
+        "delta": 5,
+        "options": [
+          2,
+          3,
+          1,
+          0
+        ]
+      },
+      {
+        "prerequisites": [
+          0
+        ],
+        "query": 1,
+        "update": 1,
+        "delta": 2,
+        "options": [
+          3,
+          0,
+          2,
+          1
+        ]
+      },
+      {
+        "prerequisites": [
+          2
+        ],
+        "query": 0,
+        "update": 2,
+        "delta": 4,
+        "options": [
+          3,
+          1,
+          2,
+          0
+        ]
+      },
+      {
+        "prerequisites": [
+          4
+        ],
+        "query": 0,
+        "update": 0,
+        "delta": 7,
+        "options": [
+          3,
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "prerequisites": [
+          6
+        ],
+        "query": 1,
+        "update": 1,
+        "delta": 7,
+        "options": [
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    ]
+  },
+  "episode": {
+    "success": 1,
+    "completed": 8,
+    "calls": 8,
+    "evaluations": 22,
+    "failure": "none",
+    "trace": [
+      {
+        "observation": {
+          "state": [
+            6,
+            4,
+            5,
+            4,
+            2,
+            4,
+            1,
+            0
+          ],
+          "done": [],
+          "terminal": false,
+          "success": false,
+          "update": null,
+          "reason": null
+        },
+        "action": [
+          0,
+          3
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            3,
+            6
+          ],
+          "reason": null
+        }
+      },
+      {
+        "observation": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            3,
+            6
+          ],
+          "reason": null
+        },
+        "action": [
+          1,
+          0
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            1,
+            5
+          ],
+          "reason": null
+        }
+      },
+      {
+        "observation": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            1,
+            5
+          ],
+          "reason": null
+        },
+        "action": [
+          2,
+          2
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            1,
+            6
+          ],
+          "reason": null
+        }
+      },
+      {
+        "observation": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            1,
+            6
+          ],
+          "reason": null
+        },
+        "action": [
+          4,
+          0
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            4
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            1,
+            2
+          ],
+          "reason": null
+        }
+      },
+      {
+        "observation": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            4
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            1,
+            2
+          ],
+          "reason": null
+        },
+        "action": [
+          5,
+          2
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            4,
+            5
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            2,
+            4
+          ],
+          "reason": null
+        }
+      },
+      {
+        "observation": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            4,
+            5
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            2,
+            4
+          ],
+          "reason": null
+        },
+        "action": [
+          3,
+          2
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            3,
+            5
+          ],
+          "reason": null
+        }
+      },
+      {
+        "observation": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            3,
+            5
+          ],
+          "reason": null
+        },
+        "action": [
+          6,
+          3
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            0,
+            7
+          ],
+          "reason": null
+        }
+      },
+      {
+        "observation": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "terminal": false,
+          "success": false,
+          "update": [
+            0,
+            7
+          ],
+          "reason": null
+        },
+        "action": [
+          7,
+          2
+        ],
+        "result": {
+          "state": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "done": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "terminal": true,
+          "success": true,
+          "update": [
+            1,
+            7
+          ],
+          "reason": null
+        }
+      }
+    ]
+  }
+}

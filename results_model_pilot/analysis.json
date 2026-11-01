@@ -1,0 +1,310 @@
+{
+  "status": "exploratory_pilot_not_confirmatory",
+  "provider": "GitHub Copilot",
+  "model": [
+    "gpt-6-luna"
+  ],
+  "unique_analyzed_episode_count": 24,
+  "excluded_duplicate_episode_count": 5,
+  "task_count_per_factor_level": 3,
+  "operations_per_task": 8,
+  "cells": {
+    "depth": {
+      "low": {
+        "n": 3,
+        "successes": 2,
+        "success_rate": 0.6666666666666666,
+        "mean_completed": 5.666666666666667,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 0,
+            "completed": 1,
+            "decisions": 2,
+            "failure": "candidate"
+          },
+          {
+            "seed": 20261,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20262,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          }
+        ]
+      },
+      "high": {
+        "n": 3,
+        "successes": 3,
+        "success_rate": 1,
+        "mean_completed": 8,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20261,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20262,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          }
+        ]
+      }
+    },
+    "branching": {
+      "low": {
+        "n": 3,
+        "successes": 2,
+        "success_rate": 0.6666666666666666,
+        "mean_completed": 7.333333333333333,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20261,
+            "success": 0,
+            "completed": 6,
+            "decisions": 7,
+            "failure": "candidate"
+          },
+          {
+            "seed": 20262,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          }
+        ]
+      },
+      "high": {
+        "n": 3,
+        "successes": 3,
+        "success_rate": 1,
+        "mean_completed": 8,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20261,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20262,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          }
+        ]
+      }
+    },
+    "width": {
+      "low": {
+        "n": 3,
+        "successes": 2,
+        "success_rate": 0.6666666666666666,
+        "mean_completed": 7.333333333333333,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 0,
+            "completed": 6,
+            "decisions": 7,
+            "failure": "dependency"
+          },
+          {
+            "seed": 20261,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20262,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          }
+        ]
+      },
+      "high": {
+        "n": 3,
+        "successes": 2,
+        "success_rate": 0.6666666666666666,
+        "mean_completed": 6.333333333333333,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 0,
+            "completed": 3,
+            "decisions": 4,
+            "failure": "candidate"
+          },
+          {
+            "seed": 20261,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20262,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          }
+        ]
+      }
+    },
+    "observation": {
+      "low": {
+        "n": 3,
+        "successes": 0,
+        "success_rate": 0,
+        "mean_completed": 5,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 0,
+            "completed": 7,
+            "decisions": 8,
+            "failure": "candidate"
+          },
+          {
+            "seed": 20261,
+            "success": 0,
+            "completed": 6,
+            "decisions": 7,
+            "failure": "candidate"
+          },
+          {
+            "seed": 20262,
+            "success": 0,
+            "completed": 2,
+            "decisions": 3,
+            "failure": "candidate"
+          }
+        ]
+      },
+      "high": {
+        "n": 3,
+        "successes": 2,
+        "success_rate": 0.6666666666666666,
+        "mean_completed": 5.333333333333333,
+        "seeds": [
+          20260,
+          20261,
+          20262
+        ],
+        "trial_results": [
+          {
+            "seed": 20260,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          },
+          {
+            "seed": 20261,
+            "success": 0,
+            "completed": 0,
+            "decisions": 1,
+            "failure": "candidate"
+          },
+          {
+            "seed": 20262,
+            "success": 1,
+            "completed": 8,
+            "decisions": 8,
+            "failure": "none"
+          }
+        ]
+      }
+    }
+  },
+  "usage_call_count_including_smoke": 168,
+  "premium_request_cost_including_smoke": 168,
+  "total_nano_aiu_including_smoke": 16180255000,
+  "total_ai_credits_including_smoke": 16.180255,
+  "tokens_including_smoke": {
+    "input": 504,
+    "cache_read": 1493565,
+    "cache_write": 1048536,
+    "output": 31499
+  },
+  "limitations": [
+    "One routed model only; no Gemini or Qwen model was available in this Copilot CLI account.",
+    "No reasoning-budget comparison: the available Auto route does not accept a selectable reasoning-effort setting.",
+    "Three task seeds per cell are exploratory and do not support reliable inferential claims.",
+    "The tested workflow family is synthetic chains only; there are no external-task results.",
+    "The intervention changes task properties but does not estimate a general causal effect across models or task domains."
+  ]
+}

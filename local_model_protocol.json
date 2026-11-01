@@ -1,0 +1,71 @@
+{
+  "status": "Locally frozen CPU model study; exploratory, single-model, and not a provider-comparison or reasoning-budget study",
+  "protocol_version": 1,
+  "created_before_local_model_inference": "2026-11-01T12:36:00+05:30",
+  "implementation_amendment": "Runtime checksums and interruption logging were added after the smoke test; factorial cells, seeds, prompts, outcomes, and analysis were unchanged. The full run began before those error-path changes, so an abrupt interruption could leave its in-flight attempt unrecorded; only flushed episode rows enter the analysis.",
+  "model": {
+    "repository": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+    "source_url": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+    "file": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "quantization": "Q4_K_M",
+    "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+    "license": "Apache-2.0",
+    "inference": "llama.cpp server b12030 CPU x64, deterministic decoding (temperature 0)",
+    "maximum_output_tokens": 64,
+    "reasoning_budget_comparison": false
+  },
+  "runtime": {
+    "release": "ggml-org/llama.cpp b12030",
+    "asset": "llama-b12030-bin-win-cpu-x64.zip",
+    "source_url": "https://github.com/ggml-org/llama.cpp/releases/download/b12030/llama-b12030-bin-win-cpu-x64.zip",
+    "asset_sha256": "0a4ed4275235508d5e25d31e1a5586ae4e1a08079d09b3a1a78f476f788918c6",
+    "server_host": "127.0.0.1",
+    "context_size": 8192,
+    "generation_threads": 4,
+    "batch_threads": 4,
+    "gpu_layers": 0
+  },
+  "environment": {
+    "task_family": "paired chains and barriers",
+    "operations_per_task": 8,
+    "factors": {
+      "topology": ["chains", "barriers"],
+      "depth": [2, 8],
+      "branching": [2, 8],
+      "register_width": [1, 8],
+      "feedback": ["history", "snapshot"]
+    },
+    "design": "Complete 2^5 factorial, generated from the same eight paired seeds; same work and state alphabet throughout.",
+    "paired_seeds": [41000, 41001, 41002, 41003, 41004, 41005, 41006, 41007],
+    "planned_episodes": 256,
+    "maximum_model_decisions": 2048,
+    "failure_protocol": "Invalid JSON, invalid action, candidate error, or dependency error terminates that episode; no retries. Runtime/request interruptions are stored separately in attempts.jsonl and are excluded from primary analyses."
+  },
+  "prompting": {
+    "interface": "Text prompt with complete task specification, current observation, and action/feedback history; one next action per response.",
+    "action_schema": "{\"node_id\": integer, \"slot\": integer}",
+    "systematic_prompt_variants": false,
+    "reasoning_trace_requested": false
+  },
+  "outcomes": [
+    "complete all eight operations",
+    "number of operations completed",
+    "first failure type",
+    "model output parse/action validity",
+    "prompt and completion tokens",
+    "generation latency"
+  ],
+  "analysis": {
+    "primary": "Paired high-minus-low success-rate differences for topology, depth, branching, register width, and feedback, averaged over other factorial conditions.",
+    "uncertainty": "Seed-cluster bootstrap intervals; tasks sharing a seed are kept together.",
+    "secondary": "Failure categories and per-factor-level success; factorial interactions are descriptive because eight seed clusters do not power stable high-order interaction claims.",
+    "exclusions": "Only complete, unique preregistered seed-by-factorial-cell episodes enter the primary analysis. Interrupted episodes are retained separately and are not silently replaced.",
+    "multiplicity": "No confirmatory significance claims; all effect estimates are descriptive with uncertainty intervals."
+  },
+  "resource_limitations": [
+    "No paid API calls or external provider inference.",
+    "One 0.5B-parameter quantized model only; results cannot support frontier-model or cross-provider claims.",
+    "No explicit reasoning-budget intervention.",
+    "CPU runtime may limit completion; any incomplete cells will be reported."
+  ]
+}

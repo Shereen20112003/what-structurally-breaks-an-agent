@@ -1,0 +1,95 @@
+{
+  "status": "exploratory_fractional_factorial",
+  "protocol_sha256": "a486be8edbd32c483eb3c9c4de8408a447b19c80aa41573fd3fb414ac2f0068e",
+  "runner_sha256": "659888a79738c1e9088e3e05b1b00f7e8d563a01b348063fa53b7014a7ec8177",
+  "analysis_sha256": "9f4c914c665028a3e4b8a171d14e1aad37fc06ecf80445fcdd484aa563444d0c",
+  "benchmark_sha256": "8bad864e29d305150c1861459d58fbeeff87f3fac19c3768c7194b96b2366c98",
+  "prompt_source_sha256": "25f4f268bf63d41c21b832f2a4592c1ff19416a60154cbbd83b6cfc0ffc851b6",
+  "episode_sha256": "0b2478eba5159f20ed17a758c297fb8987c0bc99a39cd6a6d9446c4147ab59e7",
+  "episode_count": 16,
+  "success_count": 8,
+  "success_rate": 0.5,
+  "completed_operation_total": 88,
+  "mean_completed_operations": 5.5,
+  "decision_count": 96,
+  "failure_counts": {
+    "candidate": 7,
+    "dependency": 1
+  },
+  "factor_effects": {
+    "depth": {
+      "seed_paired_differences": {
+        "20263": {
+          "success_difference_high_minus_low": 0.0,
+          "completed_operations_difference_high_minus_low": 0.5
+        },
+        "20264": {
+          "success_difference_high_minus_low": -0.5,
+          "completed_operations_difference_high_minus_low": -3.5
+        }
+      },
+      "mean_success_difference": -0.25,
+      "mean_completed_operations_difference": -1.5
+    },
+    "branching": {
+      "seed_paired_differences": {
+        "20263": {
+          "success_difference_high_minus_low": 0.5,
+          "completed_operations_difference_high_minus_low": 1.5
+        },
+        "20264": {
+          "success_difference_high_minus_low": 0.5,
+          "completed_operations_difference_high_minus_low": 1.5
+        }
+      },
+      "mean_success_difference": 0.5,
+      "mean_completed_operations_difference": 1.5
+    },
+    "width": {
+      "seed_paired_differences": {
+        "20263": {
+          "success_difference_high_minus_low": 0.0,
+          "completed_operations_difference_high_minus_low": 1.5
+        },
+        "20264": {
+          "success_difference_high_minus_low": 0.5,
+          "completed_operations_difference_high_minus_low": 3.5
+        }
+      },
+      "mean_success_difference": 0.25,
+      "mean_completed_operations_difference": 2.5
+    },
+    "observation": {
+      "seed_paired_differences": {
+        "20263": {
+          "success_difference_high_minus_low": 0.5,
+          "completed_operations_difference_high_minus_low": 2.5
+        },
+        "20264": {
+          "success_difference_high_minus_low": 0.5,
+          "completed_operations_difference_high_minus_low": 1.5
+        }
+      },
+      "mean_success_difference": 0.5,
+      "mean_completed_operations_difference": 2.0
+    }
+  },
+  "factorial_aliasing": "Main effects are orthogonal but aliased with three-factor interactions; two-factor interactions are mutually aliased.",
+  "seed_count": 2,
+  "seed_count_is_confirmatory": false,
+  "model": "gpt-6-luna",
+  "model_ids_seen": [
+    "gpt-6-luna"
+  ],
+  "total_project_ai_credits_including_smoke": 25.653132,
+  "total_project_premium_request_cost_including_smoke": 264,
+  "new_factorial_ai_credits": 9.472877,
+  "new_factorial_premium_request_cost": 96,
+  "limitations": [
+    "Eight configuration combinations, each evaluated with two paired task seeds",
+    "Two seed clusters are descriptive; no reliable confirmatory confidence intervals",
+    "Main effects may be confounded with three-factor interactions; two-factor interactions are mutually aliased",
+    "One routed model and one synthetic task family; no reasoning-budget intervention",
+    "The half fraction estimates main effects under assumptions and is not a full factorial"
+  ]
+}

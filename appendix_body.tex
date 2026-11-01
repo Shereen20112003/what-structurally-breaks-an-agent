@@ -1,0 +1,243 @@
+\section{Complete Experimental Specification}
+\label{app:specification}
+The primary experiment and follow-on experiment are separately recorded.
+The primary grid uses $N=8$, depths $\{1,2,4,8\}$, candidate counts
+$\{2,4,8\}$, active widths $\{1,2,4,8\}$, both snapshot endpoints, and
+both graph families. Its seeds are 0--255 and each task is evaluated by
+eight programmed controllers. The follow-on grids use the anchors
+in the main-text ablation design; their full per-controller configurations
+are in \path{results_extended/case_design.json}.
+
+\paragraph{Pairing and randomness.}
+The base generator draws a fixed eight-slot initial array, a permutation
+of operation identifiers, a shuffled balanced query assignment, update
+registers, nonzero increments, and candidate permutations. Candidate-count
+levels filter the same eight-code permutation; active-width levels project
+query and update indices into the active width. Across work levels, different
+numbers of operations cause different subsequent random draws, so seed
+pairing is not exact surface matching. Hidden resampling uses a separate
+seeded random stream, draws eight fresh values after each success, and
+replaces only active registers. Failed trials never advance that stream.
+Controller sampling uses its own stream. Common controller seeds pair
+variants, but differing controller logic can consume different numbers
+of draws. These choices are intended for reproducibility, not to certify
+statistical independence of every repeated condition.
+
+\paragraph{Admission and positive controls.}
+There is no outcome-based rejection or regeneration. All balanced tasks
+must query every active register; clustered assignments preserve that
+coverage and its multiplicities. Concentrated-query variants explicitly
+have effective width one and are tagged as a degenerate manipulation.
+Positive controls include unrestricted deterministic tracking, residue
+tracking, deterministic preplanning, unrestricted tracking with a snapshot
+after every hidden resampling, and candidate elimination with the worst-case
+error allowance. The runner aborts if a designated positive control fails,
+if the call horizon is exceeded, or if the adaptive cache exceeds two
+entries. Analytic probabilities are derived only for supported cases;
+unsupported predictions are labelled \texttt{not\_derived}, not replaced
+with a default or fitted estimate.
+
+\paragraph{Adaptive-cache details.}
+Next-use-2 uses the public deterministic ready schedule to prioritize
+registers queried in the future. On a visible snapshot, the current query
+can be answered directly, so future-use selection skips that operation.
+During history-only feedback, a successful action confirms the queried
+residue from the chosen candidate code. The controller inserts that
+residue, applies the public increment if relevant, and evicts values
+whose next use is furthest away. This is not a generic learned memory
+strategy; future-query metadata, successful-action feedback, and public
+updates are deliberate advantages of the control.
+
+\paragraph{Preparation and storage accounting.}
+Residue caches store values modulo $b$; raw-value caches store values
+modulo eight. Reported value bits exclude dictionary keys, graph metadata,
+controller code, temporary operands, and runtime overhead. Preplanning
+records $N$ candidate slots, using the initial state as preparation
+workspace; indexed selection records $N$ maps of $b$ code-to-slot entries.
+The preparation counter charges $Nb$ table entries for each of these
+representations. It is a workload proxy, not a measurement of exact executed
+CPU instructions or comparison count in Python's \texttt{index} function.
+Lookup counts are kept separate from predicate comparisons. The experiment
+does not aggregate these categories into an invented universal compute unit.
+
+\section{Calibration Derivations}
+\label{app:proofs}
+\subsection{Completion states and schedule probabilities}
+For $k=N/d$ disjoint chains, a completion set is determined by the completed
+prefix length $0,\ldots,d$ of each chain, giving $(d+1)^k$ reachable masks.
+Each chain imposes one internal order on its $d$ operations; interleaving
+the $k$ orders gives $N!/(d!)^k$ valid permutations. A uniformly sampled
+operation permutation therefore succeeds with probability $(d!)^{-k}$.
+
+For barriers, all previous layers must be complete before any operation
+in the next layer succeeds. Each of the $d$ layers contributes $2^k-1$
+nonempty partial-completion choices, with one initial empty mask, giving
+$d(2^k-1)+1$ distinct masks. Each layer's operations can be internally
+permuted in $k!$ ways, so the valid-order count is $(k!)^d$ and random-order
+success is $(k!)^d/N!$. Failed-action sinks are not included in these
+completion-mask counts.
+
+\subsection{Deterministic history and residue sufficiency}
+Let $C_t$ be the completed-operation set after $t$ successes. Because each
+update is additive and public,
+\[
+ x_r(t)=x_r(0)+
+ \sum_{v\in C_t:u_v=r}\delta_v \pmod8.
+\]
+Thus the initial observation and successful-action history determine every
+register exactly. Repeating snapshots cannot improve optimal information
+availability in this deterministic protocol, although it can help a
+restricted retention strategy. Since each tested $b$ divides eight, the
+same equation modulo $b$ determines every candidate predicate. Tracking
+$x_r\bmod b$ is therefore sufficient; storing all three raw value bits
+is not necessary for $b=2$ or $b=4$.
+
+A known ready schedule can also be simulated once using the initial
+observation. Recording its future candidate slots is an exact plan in the
+deterministic protocol. That construction establishes an alternative
+representation, not a lower bound on memory and not a claim that planning
+uses less total storage or preparation.
+
+\subsection{Missing-information ceiling}
+In the hidden-resampling condition, all active values are freshly uniform
+after each success. Before a masked decision, conditioning on any visible
+history still leaves the queried code uniform on $0,\ldots,b-1$.
+Choosing a different ready operation cannot change this fact, because every
+active register has the same independent fresh distribution. Consequently,
+the conditional probability of each hidden decision succeeding is at most
+$1/b$, regardless of additional computation.
+
+With no retries, the number of visible decisions on a successful path is
+$v=\lceil N/h\rceil$ for snapshot period $h>0$, or $v=1$ for initial-only
+feedback. Applying the chain rule gives $P(\text{complete})\le b^{-(N-v)}$.
+An unrestricted exact controller attains this ceiling. The bound does not
+apply unchanged to recovery protocols: failed trials preserve state and
+provide information that can support elimination. For scan-limited
+controllers, formulas that average visible candidate-order draws are
+ensemble predictions and are labelled separately from exact
+instance-conditional predictions.
+
+\subsection{Finite retry budgets}
+Uniform replacement guesses have success probability $p=1/b$ per attempt.
+If $F$ is the number of errors before $N$ successes, then
+\[
+ \Pr(F\le R)=\sum_{r=0}^{R}
+   {N+r-1\choose r}p^N(1-p)^r.
+\]
+Under uniform elimination, the correct code has a uniformly random rank
+in a permutation of the $b$ candidates. Errors per operation are therefore
+independent uniform counts on $\{0,\ldots,b-1\}$. The finite-budget
+probability is
+\[
+ \Pr(F\le R)=\frac{1}{b^N}
+ \sum_{r=0}^{R}[z^r](1+z+\cdots+z^{b-1})^N.
+\]
+The implementation evaluates this coefficient sum by a truncated
+convolution. If $R\ge N(b-1)$ the probability is one. Mean calls without
+budget exhaustion are $Nb$ for replacement and $N(b+1)/2$ for elimination.
+These are exact properties of the selected guessing policies, not
+general guarantees for arbitrary tool-using controllers.
+
+\section{All Follow-On Outcome Summaries}
+\label{app:ablationtables}
+Each row below averages equally over the remaining anchors of its grid.
+Low and high are descriptive 95\% percentile bands from 2,000 paired
+seed-block bootstrap resamples. They are not simultaneous confidence
+statements. Constants produce degenerate bands; a sampled zero is not
+a proof of zero probability. Calls include failed attempts and stop at
+termination. For exact analytic predictions, progress, error counts,
+comparison counts, preparation workload, lookups, and cache measurements,
+see \path{results_extended/summary.csv}. All 77 paired contrast estimates
+and their bands are in \path{results_extended/paired_contrasts.csv}.
+
+Condition notation uses \texttt{n} for operation count, \texttt{p} for
+snapshot period, \texttt{r} for global error allowance, and
+\texttt{shock1} for independent hidden resampling. Period zero means
+initial-only state feedback. The \texttt{reverse} flag indicates operation
+identifier reversal. All grids use both graph families.
+
+\small
+\subsection{Operation Count}
+\input{generated/ablation_work}
+\subsection{Retention Strategy}
+\input{generated/ablation_memory}
+\subsection{Snapshot Cadence and Hidden Resampling}
+\input{generated/ablation_observation}
+\subsection{Recovery and Candidate Elimination}
+\input{generated/ablation_recovery}
+\subsection{Query Locality and State Updates}
+\input{generated/ablation_locality}
+\subsection{Candidate Selection and Resource Controls}
+\input{generated/ablation_selection}
+\subsection{Operation Identifiers}
+\input{generated/ablation_labels}
+\normalsize
+
+\section{All Endpoint Interaction Estimates}
+\label{app:interactions}
+The following estimates are exploratory follow-on analyses of the original
+192-cell factorial experiment. $D,B,W,O$ denote depth, candidate count,
+active width, and history-only versus snapshot feedback. Endpoint
+contrasts use high minus low for each participating dimension and average
+all nonparticipating controls over their original levels. A pairwise
+interaction is a difference-in-differences; the corresponding signed
+construction generalizes to orders three and four. Values are percentage
+points, so an interaction is not itself a success probability. Per-estimate
+bootstrap bands are retained in
+\path{results_extended/all_endpoint_interactions.csv}.
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{\input{generated/pairwise_interactions}}
+
+\medskip
+\resizebox{\textwidth}{!}{\input{generated/higher_interactions}}
+\end{center}
+
+\section{Workshop Comparison and Submission Scope}
+We inspected four ALA 2025 papers as a purposive sample, not all workshop
+papers and not a systematic novelty search. Their total PDF lengths are
+nine pages (failure sampling), ten (Dynamic Thinker), ten (task-graph
+scheduling), and eight (deliberation cost). References begin on pages
+nine, eight, seven, and eight, respectively. Total PDF length therefore
+does not equal the allowed main-text length.
+
+The historical ALA 2025 call allows original work up to eight pages
+excluding references, and preliminary or outlook papers up to six pages.
+It specifies double-blind review and deanonymized camera-ready copies.
+Our expanded authored version is a preprint-style manuscript with an
+appendix; the separate \path{review.tex} source removes the author block
+and appendix, but must still be checked against the current workshop's
+track and page rules. A longer document is not evidence of acceptance
+or of a stronger contribution. No current-edition acceptance, conference
+metadata, or submission date is asserted.
+
+\section{Reproduction and Evidence Boundaries}
+The benchmark, controllers, tests, and analysis use the Python standard
+library. Document inspection additionally uses the pinned PDF packages.
+From the project directory in a Windows PowerShell terminal:
+\begin{verbatim}
+.\.venv\Scripts\python.exe -m unittest -v test_benchmark test_extended
+.\.venv\Scripts\python.exe run_experiments.py --seeds 256
+.\.venv\Scripts\python.exe analyze.py
+.\.venv\Scripts\python.exe run_extended.py
+.\.venv\Scripts\python.exe analyze_extended.py
+.\build.ps1
+.\.venv\Scripts\python.exe verify_artifact.py
+.\.venv\Scripts\python.exe package_artifact.py
+\end{verbatim}
+Re-running the primary experiment replaces its generated records;
+the source and protocol hashes must match the supplied metadata when
+reproducing that study. The original and follow-on episode files have
+separate hashes and execution metadata. The two locally frozen protocols
+and the time ordering of exploratory analyses are retained explicitly.
+Complete primary contrasts, rare-scheduler Wilson intervals, and example
+traces remain available in the original result directory.
+
+This artifact contains only programmed-controller evidence. No frontier
+model, learned policy, training run, provider reasoning-budget intervention,
+human participant, or realistic transfer task has been evaluated.
+Source compilation and local reproducibility do not establish arXiv
+moderation approval, workshop acceptance, or compatibility with a
+particular submission processor. The author must review the manuscript
+and current submission rules before uploading it.

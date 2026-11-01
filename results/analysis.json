@@ -1,0 +1,828 @@
+{
+  "episodes": 393216,
+  "summaries": [
+    {
+      "family": "barriers",
+      "policy": "exact",
+      "success": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
+      "predicted": 1.0,
+      "completed": 8.0,
+      "evaluations": 22.633544921875,
+      "episodes": 24576
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2",
+      "success": 0.7562662760416666,
+      "ci_low": 0.755126953125,
+      "ci_high": 0.7574869791666666,
+      "predicted": 0.7556152983258168,
+      "completed": 6.563028971354167,
+      "evaluations": 18.165730794270832,
+      "episodes": 24576
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2_scan4",
+      "success": 0.5105794270833334,
+      "ci_low": 0.5087076822916666,
+      "ci_high": 0.5126546223958334,
+      "predicted": 0.5113236861749707,
+      "completed": 4.911376953125,
+      "evaluations": 11.119384765625,
+      "episodes": 24576
+    },
+    {
+      "family": "barriers",
+      "policy": "memory4",
+      "success": 0.8789469401041666,
+      "ci_low": 0.8780110677083334,
+      "ci_high": 0.8799641927083334,
+      "predicted": 0.8793094952901205,
+      "completed": 7.325724283854167,
+      "evaluations": 20.519571940104168,
+      "episodes": 24576
+    },
+    {
+      "family": "barriers",
+      "policy": "random_order",
+      "success": 0.25,
+      "ci_low": 0.25,
+      "ci_high": 0.25,
+      "predicted": 0.2536768353174603,
+      "completed": 2.27734375,
+      "evaluations": 8.601481119791666,
+      "episodes": 24576
+    },
+    {
+      "family": "barriers",
+      "policy": "scan1",
+      "success": 0.335205078125,
+      "ci_low": 0.33447265625,
+      "ci_high": 0.33610026041666663,
+      "predicted": 0.3345524568962179,
+      "completed": 3.0987955729166665,
+      "evaluations": 3.7635904947916665,
+      "episodes": 24576
+    },
+    {
+      "family": "barriers",
+      "policy": "scan4",
+      "success": 0.673828125,
+      "ci_low": 0.6720377604166666,
+      "ci_high": 0.6756184895833333,
+      "predicted": 0.6741803549230099,
+      "completed": 5.868733723958333,
+      "evaluations": 13.454508463541666,
+      "episodes": 24576
+    },
+    {
+      "family": "barriers",
+      "policy": "uniform",
+      "success": 0.0011393229166666665,
+      "ci_low": 0.0005696614583333333,
+      "ci_high": 0.0017903645833333333,
+      "predicted": 0.0013071894645690918,
+      "completed": 0.49951171875,
+      "evaluations": 0.0,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "exact",
+      "success": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
+      "predicted": 1.0,
+      "completed": 8.0,
+      "evaluations": 22.640543619791668,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "memory2",
+      "success": 0.7557373046875,
+      "ci_low": 0.754638671875,
+      "ci_high": 0.7567952473958334,
+      "predicted": 0.7556152983258168,
+      "completed": 6.563028971354167,
+      "evaluations": 18.199747721354168,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "memory2_scan4",
+      "success": 0.5118408203125,
+      "ci_low": 0.5099690755208334,
+      "ci_high": 0.5137939453125,
+      "predicted": 0.5117959732985279,
+      "completed": 4.917805989583333,
+      "evaluations": 11.144571940104166,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "memory4",
+      "success": 0.878662109375,
+      "ci_low": 0.8778483072916666,
+      "ci_high": 0.879638671875,
+      "predicted": 0.8793094952901205,
+      "completed": 7.327311197916667,
+      "evaluations": 20.534952799479168,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "random_order",
+      "success": 0.259765625,
+      "ci_low": 0.25390625,
+      "ci_high": 0.2666015625,
+      "predicted": 0.26606522817460315,
+      "completed": 2.38671875,
+      "evaluations": 8.878173828125,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "scan1",
+      "success": 0.33463541666666663,
+      "ci_low": 0.333984375,
+      "ci_high": 0.33536783854166663,
+      "predicted": 0.3345347559088294,
+      "completed": 3.0928548177083335,
+      "evaluations": 3.7582194010416665,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "scan4",
+      "success": 0.67431640625,
+      "ci_low": 0.672607421875,
+      "ci_high": 0.6763509114583333,
+      "predicted": 0.6748501323163509,
+      "completed": 5.866292317708333,
+      "evaluations": 13.460042317708334,
+      "episodes": 24576
+    },
+    {
+      "family": "chains",
+      "policy": "uniform",
+      "success": 0.0013834635416666665,
+      "ci_low": 0.000732421875,
+      "ci_high": 0.0021158854166666665,
+      "predicted": 0.0013071894645690918,
+      "completed": 0.5016276041666666,
+      "evaluations": 0.0,
+      "episodes": 24576
+    }
+  ],
+  "contrasts": [
+    {
+      "family": "barriers",
+      "policy": "exact",
+      "dimension": "depth",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "exact",
+      "dimension": "branching",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "exact",
+      "dimension": "width",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "exact",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2",
+      "dimension": "depth",
+      "estimate": 0.0001627604166666661,
+      "ci_low": -0.0027669270833333348,
+      "ci_high": 0.003092447916666663
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2",
+      "dimension": "branching",
+      "estimate": -0.016845703125,
+      "ci_low": -0.020263671875,
+      "ci_high": -0.013671875
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2",
+      "dimension": "width",
+      "estimate": -0.4943033854166667,
+      "ci_low": -0.4964192708333333,
+      "ci_high": -0.4918619791666667
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2",
+      "dimension": "observation",
+      "estimate": -0.4874674479166667,
+      "ci_low": -0.4898274739583333,
+      "ci_high": -0.4850260416666667
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2_scan4",
+      "dimension": "depth",
+      "estimate": -0.0009765624999999987,
+      "ci_low": -0.0055338541666666635,
+      "ci_high": 0.003580729166666669
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2_scan4",
+      "dimension": "branching",
+      "estimate": -0.7479248046875,
+      "ci_low": -0.753173828125,
+      "ci_high": -0.7425537109375
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2_scan4",
+      "dimension": "width",
+      "estimate": -0.33317057291666663,
+      "ci_low": -0.3367513020833333,
+      "ci_high": -0.3294270833333333
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2_scan4",
+      "dimension": "observation",
+      "estimate": -0.32633463541666663,
+      "ci_low": -0.3289388020833333,
+      "ci_high": -0.32364908854166663
+    },
+    {
+      "family": "barriers",
+      "policy": "memory4",
+      "dimension": "depth",
+      "estimate": -0.0008138020833333326,
+      "ci_low": -0.0032552083333333317,
+      "ci_high": 0.001627604166666667
+    },
+    {
+      "family": "barriers",
+      "policy": "memory4",
+      "dimension": "branching",
+      "estimate": -0.0089111328125,
+      "ci_low": -0.0113525390625,
+      "ci_high": -0.00634765625
+    },
+    {
+      "family": "barriers",
+      "policy": "memory4",
+      "dimension": "width",
+      "estimate": -0.4842122395833333,
+      "ci_low": -0.4881184895833333,
+      "ci_high": -0.4803059895833333
+    },
+    {
+      "family": "barriers",
+      "policy": "memory4",
+      "dimension": "observation",
+      "estimate": -0.24210611979166666,
+      "ci_low": -0.24397786458333334,
+      "ci_high": -0.24015299479166666
+    },
+    {
+      "family": "barriers",
+      "policy": "random_order",
+      "dimension": "depth",
+      "estimate": -1.0,
+      "ci_low": -1.0,
+      "ci_high": -1.0
+    },
+    {
+      "family": "barriers",
+      "policy": "random_order",
+      "dimension": "branching",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "random_order",
+      "dimension": "width",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "random_order",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "scan1",
+      "dimension": "depth",
+      "estimate": 0.000651041666666667,
+      "ci_low": -0.0016276041666666674,
+      "ci_high": 0.0029296875000000013
+    },
+    {
+      "family": "barriers",
+      "policy": "scan1",
+      "dimension": "branching",
+      "estimate": -1.0,
+      "ci_low": -1.0,
+      "ci_high": -1.0
+    },
+    {
+      "family": "barriers",
+      "policy": "scan1",
+      "dimension": "width",
+      "estimate": -0.0022786458333333348,
+      "ci_low": -0.004557291666666669,
+      "ci_high": -4.336808689942018e-19
+    },
+    {
+      "family": "barriers",
+      "policy": "scan1",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "scan4",
+      "dimension": "depth",
+      "estimate": -0.0035807291666666683,
+      "ci_low": -0.007812500000000003,
+      "ci_high": 0.000651041666666667
+    },
+    {
+      "family": "barriers",
+      "policy": "scan4",
+      "dimension": "branching",
+      "estimate": -0.978515625,
+      "ci_low": -0.983642578125,
+      "ci_high": -0.972900390625
+    },
+    {
+      "family": "barriers",
+      "policy": "scan4",
+      "dimension": "width",
+      "estimate": 0.003580729166666667,
+      "ci_low": -0.002278645833333335,
+      "ci_high": 0.010091145833333334
+    },
+    {
+      "family": "barriers",
+      "policy": "scan4",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "uniform",
+      "dimension": "depth",
+      "estimate": 0.0013020833333333333,
+      "ci_low": 0.0,
+      "ci_high": 0.0029296875
+    },
+    {
+      "family": "barriers",
+      "policy": "uniform",
+      "dimension": "branching",
+      "estimate": -0.00341796875,
+      "ci_low": -0.00537109375,
+      "ci_high": -0.001708984375
+    },
+    {
+      "family": "barriers",
+      "policy": "uniform",
+      "dimension": "width",
+      "estimate": 0.0013020833333333333,
+      "ci_low": -0.0009765625,
+      "ci_high": 0.0035807291666666665
+    },
+    {
+      "family": "barriers",
+      "policy": "uniform",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "exact",
+      "dimension": "depth",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "exact",
+      "dimension": "branching",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "exact",
+      "dimension": "width",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "exact",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "memory2",
+      "dimension": "depth",
+      "estimate": 0.0001627604166666661,
+      "ci_low": -0.0027669270833333326,
+      "ci_high": 0.003255208333333331
+    },
+    {
+      "family": "chains",
+      "policy": "memory2",
+      "dimension": "branching",
+      "estimate": -0.01513671875,
+      "ci_low": -0.0184326171875,
+      "ci_high": -0.0123291015625
+    },
+    {
+      "family": "chains",
+      "policy": "memory2",
+      "dimension": "width",
+      "estimate": -0.4939778645833333,
+      "ci_low": -0.49609375,
+      "ci_high": -0.4915364583333333
+    },
+    {
+      "family": "chains",
+      "policy": "memory2",
+      "dimension": "observation",
+      "estimate": -0.488525390625,
+      "ci_low": -0.4906412760416667,
+      "ci_high": -0.4862467447916667
+    },
+    {
+      "family": "chains",
+      "policy": "memory2_scan4",
+      "dimension": "depth",
+      "estimate": -0.0009765624999999987,
+      "ci_low": -0.005371093749999999,
+      "ci_high": 0.003743489583333334
+    },
+    {
+      "family": "chains",
+      "policy": "memory2_scan4",
+      "dimension": "branching",
+      "estimate": -0.744873046875,
+      "ci_low": -0.7501220703125,
+      "ci_high": -0.739501953125
+    },
+    {
+      "family": "chains",
+      "policy": "memory2_scan4",
+      "dimension": "width",
+      "estimate": -0.33317057291666663,
+      "ci_low": -0.3369140625,
+      "ci_high": -0.3291015625
+    },
+    {
+      "family": "chains",
+      "policy": "memory2_scan4",
+      "dimension": "observation",
+      "estimate": -0.326904296875,
+      "ci_low": -0.3294270833333333,
+      "ci_high": -0.32421875
+    },
+    {
+      "family": "chains",
+      "policy": "memory4",
+      "dimension": "depth",
+      "estimate": -0.0008138020833333326,
+      "ci_low": -0.00325520833333333,
+      "ci_high": 0.001627604166666666
+    },
+    {
+      "family": "chains",
+      "policy": "memory4",
+      "dimension": "branching",
+      "estimate": -0.009033203125,
+      "ci_low": -0.0115966796875,
+      "ci_high": -0.0064697265625
+    },
+    {
+      "family": "chains",
+      "policy": "memory4",
+      "dimension": "width",
+      "estimate": -0.4853515625,
+      "ci_low": -0.4889322916666667,
+      "ci_high": -0.4817708333333333
+    },
+    {
+      "family": "chains",
+      "policy": "memory4",
+      "dimension": "observation",
+      "estimate": -0.24267578125,
+      "ci_low": -0.244384765625,
+      "ci_high": -0.24080403645833334
+    },
+    {
+      "family": "chains",
+      "policy": "random_order",
+      "dimension": "depth",
+      "estimate": -1.0,
+      "ci_low": -1.0,
+      "ci_high": -1.0
+    },
+    {
+      "family": "chains",
+      "policy": "random_order",
+      "dimension": "branching",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "random_order",
+      "dimension": "width",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "random_order",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "scan1",
+      "dimension": "depth",
+      "estimate": 0.000651041666666667,
+      "ci_low": -0.0016276041666666674,
+      "ci_high": 0.0029296875000000013
+    },
+    {
+      "family": "chains",
+      "policy": "scan1",
+      "dimension": "branching",
+      "estimate": -1.0,
+      "ci_low": -1.0,
+      "ci_high": -1.0
+    },
+    {
+      "family": "chains",
+      "policy": "scan1",
+      "dimension": "width",
+      "estimate": -0.0006510416666666672,
+      "ci_low": -0.0022786458333333348,
+      "ci_high": 0.0013020833333333333
+    },
+    {
+      "family": "chains",
+      "policy": "scan1",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "scan4",
+      "dimension": "depth",
+      "estimate": -0.0035807291666666683,
+      "ci_low": -0.008138020833333337,
+      "ci_high": 0.000651041666666667
+    },
+    {
+      "family": "chains",
+      "policy": "scan4",
+      "dimension": "branching",
+      "estimate": -0.97705078125,
+      "ci_low": -0.982666015625,
+      "ci_high": -0.971435546875
+    },
+    {
+      "family": "chains",
+      "policy": "scan4",
+      "dimension": "width",
+      "estimate": 0.006510416666666668,
+      "ci_low": 0.00032552083333333174,
+      "ci_high": 0.013346354166666668
+    },
+    {
+      "family": "chains",
+      "policy": "scan4",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "uniform",
+      "dimension": "depth",
+      "estimate": 0.0013020833333333333,
+      "ci_low": 0.0,
+      "ci_high": 0.0029296875
+    },
+    {
+      "family": "chains",
+      "policy": "uniform",
+      "dimension": "branching",
+      "estimate": -0.004150390625,
+      "ci_low": -0.006103515625,
+      "ci_high": -0.00244140625
+    },
+    {
+      "family": "chains",
+      "policy": "uniform",
+      "dimension": "width",
+      "estimate": 0.0,
+      "ci_low": -0.001953125,
+      "ci_high": 0.001953125
+    },
+    {
+      "family": "chains",
+      "policy": "uniform",
+      "dimension": "observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    }
+  ],
+  "interactions": [
+    {
+      "family": "barriers",
+      "policy": "exact",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2",
+      "interaction": "width_by_observation",
+      "estimate": -0.9886067708333334,
+      "ci_low": -0.9928385416666666,
+      "ci_high": -0.9837239583333334
+    },
+    {
+      "family": "barriers",
+      "policy": "memory2_scan4",
+      "interaction": "width_by_observation",
+      "estimate": -0.6676432291666666,
+      "ci_low": -0.6728515625,
+      "ci_high": -0.6627604166666666
+    },
+    {
+      "family": "barriers",
+      "policy": "memory4",
+      "interaction": "width_by_observation",
+      "estimate": -0.9684244791666666,
+      "ci_low": -0.9755859375,
+      "ci_high": -0.9602864583333334
+    },
+    {
+      "family": "barriers",
+      "policy": "random_order",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "scan1",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "scan4",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "barriers",
+      "policy": "uniform",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "exact",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "memory2",
+      "interaction": "width_by_observation",
+      "estimate": -0.9879557291666666,
+      "ci_low": -0.9925130208333334,
+      "ci_high": -0.9833984375
+    },
+    {
+      "family": "chains",
+      "policy": "memory2_scan4",
+      "interaction": "width_by_observation",
+      "estimate": -0.6689453125,
+      "ci_low": -0.6748046875,
+      "ci_high": -0.6634114583333333
+    },
+    {
+      "family": "chains",
+      "policy": "memory4",
+      "interaction": "width_by_observation",
+      "estimate": -0.970703125,
+      "ci_low": -0.9781901041666666,
+      "ci_high": -0.9635416666666666
+    },
+    {
+      "family": "chains",
+      "policy": "random_order",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "scan1",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "scan4",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    },
+    {
+      "family": "chains",
+      "policy": "uniform",
+      "interaction": "width_by_observation",
+      "estimate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    }
+  ],
+  "max_abs_prediction_error": 0.006299603174603152,
+  "analysis_sha256": "7f823d3fc35034c11936f5269aca4bada4397da29660794404aa936854d00616",
+  "episode_hash_verified": true
+}

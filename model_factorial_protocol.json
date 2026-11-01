@@ -1,0 +1,67 @@
+{
+  "status": "Prospective, budget-limited exploratory model study; not externally preregistered",
+  "created_before_inference": true,
+  "provider": "GitHub Copilot",
+  "model_selection": "auto; stop and report if any response is not gpt-6-luna",
+  "task_family": "chains",
+  "operation_count": 8,
+  "factors": {
+    "depth": {
+      "low": 2,
+      "high": 8
+    },
+    "branching": {
+      "low": 2,
+      "high": 8
+    },
+    "width": {
+      "low": 1,
+      "high": 8
+    },
+    "observation": {
+      "low": "history",
+      "high": "snapshot"
+    }
+  },
+  "design": "2^(4-1) resolution-IV half fraction, observation=depth*branching*width in coded +/-1 levels; main effects are orthogonal but aliased with three-factor interactions, and two-factor interactions are mutually aliased",
+  "limitations": [
+    "Eight configuration combinations, each evaluated with two paired task seeds",
+    "Two seed clusters are descriptive; no reliable confirmatory confidence intervals",
+    "Main effects may be confounded with three-factor interactions; two-factor interactions are mutually aliased",
+    "One routed model and one synthetic task family; no reasoning-budget intervention",
+    "The half fraction estimates main effects under assumptions and is not a full factorial"
+  ],
+  "seeds": [
+    20263,
+    20264
+  ],
+  "condition_order_seed": 20261101,
+  "primary_outcome": "Complete all eight operations without an invalid action",
+  "secondary_outcomes": [
+    "completed operations",
+    "first failure category",
+    "decision count",
+    "AI credits",
+    "premium request cost"
+  ],
+  "failure_protocol": "Invalid JSON, invalid action schema, or invalid environment action terminates the episode without retry",
+  "budget": {
+    "total_project_stop_threshold_ai_credits": 27.0,
+    "pre_call_stop_threshold_ai_credits": 26.75,
+    "prior_project_usage_including_smoke_ai_credits": 16.180255,
+    "maximum_incremental_ai_credits_before_pre_call_stop": 10.569745,
+    "per_invocation_soft_cap_ai_credits": 30,
+    "observed_max_historical_single_invocation_ai_credits": 0.207005,
+    "cap_note": "The CLI requires a minimum 30-AI-credit per-invocation cap; it is soft and not the cumulative study budget. A pre-call cumulative guard at 26.75 leaves margin below the 27.0 project stop. Copilot reports AI credits, not dollars. Remaining account quota is unavailable, so the 35%-quota rule cannot be verified."
+  },
+  "analysis": "Report raw cell outcomes and paired seed contrasts; do not make confirmatory or generalization claims",
+  "budget_amendment_before_inference": "The CLI rejected a 0.5-AI-credit per-invocation cap before any model request; no inference was run. The accepted soft cap is 30 per invocation, with a pre-call cumulative stop at 26.75 AI credits and a project stop at 27.0.",
+  "budget_amendment_during_run": "On 2026-11-01, the user explicitly overrode the earlier USD 15 ceiling for this experiment and authorized continued Copilot-credit usage while accepting that the dollar equivalent and remaining account quota cannot be verified. The runner's cumulative AI-credit stop remains in effect. After 15 episodes had completed and their descriptive outcomes were viewed, the user authorized resuming to complete the prespecified 16th episode; the design and condition were unchanged.",
+  "post_run_analysis_amendment": "The analyzer accepts repeated gpt-6-luna entries in per-decision route logs and validates that their unique set contains only the prespecified model. This corrects an initial validation failure; no episode data or outcome definitions were changed.",
+  "source_sha256": {
+    "benchmark.py": "8bad864e29d305150c1861459d58fbeeff87f3fac19c3768c7194b96b2366c98",
+    "run_model_pilot.py": "25f4f268bf63d41c21b832f2a4592c1ff19416a60154cbbd83b6cfc0ffc851b6",
+    "run_model_factorial.py": "659888a79738c1e9088e3e05b1b00f7e8d563a01b348063fa53b7014a7ec8177",
+    "analyze_model_factorial.py": "eefc7737be50f63199e8c667127fc87e752b4646c501e1e4baa392c3b8ea9264"
+  }
+}

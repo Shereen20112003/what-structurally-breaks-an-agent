@@ -1,0 +1,42 @@
+{
+  "status": "Exploratory paired replication block defined after the first pilot block; not confirmatory and not a preregistration",
+  "created_before_extension_inference": true,
+  "provider": "GitHub Copilot",
+  "model_selection": "auto; actual observed model must remain gpt-6-luna or block is reported by model",
+  "task_family": "chains",
+  "paired_seed": 20262,
+  "interventions": {
+    "depth": {
+      "low": {"depth": 1, "branching": 4, "width": 4, "observation": "snapshot"},
+      "high": {"depth": 8, "branching": 4, "width": 4, "observation": "snapshot"}
+    },
+    "branching": {
+      "low": {"depth": 4, "branching": 2, "width": 4, "observation": "snapshot"},
+      "high": {"depth": 4, "branching": 8, "width": 4, "observation": "snapshot"}
+    },
+    "width": {
+      "low": {"depth": 4, "branching": 4, "width": 1, "observation": "snapshot"},
+      "high": {"depth": 4, "branching": 4, "width": 8, "observation": "snapshot"}
+    },
+    "observation": {
+      "low": {"depth": 4, "branching": 4, "width": 4, "observation": "history"},
+      "high": {"depth": 4, "branching": 4, "width": 4, "observation": "snapshot"}
+    }
+  },
+  "task_count": 8,
+  "maximum_decisions": 64,
+  "primary_outcome": "Complete all eight operations without an invalid action",
+  "budget": {
+    "authorized_total_ai_credits": 30,
+    "stop_threshold_ai_credits": 28,
+    "already_used_ai_credits_including_smoke": 10.4669085,
+    "per_invocation_cli_cap": 30,
+    "cap_limitation": "Copilot CLI documents the cap as soft; check cumulative actual usage after every response."
+  },
+  "limitations": [
+    "One model family and one routed model only",
+    "No selectable reasoning-budget control",
+    "Three paired seeds after this block remain pilot-scale, not inferentially adequate",
+    "No Gemini or Qwen endpoint is configured"
+  ]
+}

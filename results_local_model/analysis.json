@@ -1,0 +1,161 @@
+{
+  "analysis": "descriptive full-factorial marginal contrasts",
+  "analysis_source_sha256": "867e5d280ac857c8fadfd4ccd0fb19e2dc61a58fddfafb5144bd77636510b694",
+  "bootstrap_resamples": 10000,
+  "bootstrap_seed": 20261101,
+  "completed_operation_total": 21,
+  "confirmatory_claims": false,
+  "contrasts": [
+    {
+      "contrast": "barriers - chains",
+      "episodes_per_level": 128,
+      "factor": "family",
+      "high_level": "barriers",
+      "high_rate": 0,
+      "high_successes": 0,
+      "low_level": "chains",
+      "low_rate": 0,
+      "low_successes": 0,
+      "paired_difference": 0,
+      "per_seed_paired_differences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "seed_cluster_bootstrap_95_percent_interval": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "contrast": "8 - 2",
+      "episodes_per_level": 128,
+      "factor": "depth",
+      "high_level": 8,
+      "high_rate": 0,
+      "high_successes": 0,
+      "low_level": 2,
+      "low_rate": 0,
+      "low_successes": 0,
+      "paired_difference": 0,
+      "per_seed_paired_differences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "seed_cluster_bootstrap_95_percent_interval": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "contrast": "8 - 2",
+      "episodes_per_level": 128,
+      "factor": "branching",
+      "high_level": 8,
+      "high_rate": 0,
+      "high_successes": 0,
+      "low_level": 2,
+      "low_rate": 0,
+      "low_successes": 0,
+      "paired_difference": 0,
+      "per_seed_paired_differences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "seed_cluster_bootstrap_95_percent_interval": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "contrast": "8 - 1",
+      "episodes_per_level": 128,
+      "factor": "width",
+      "high_level": 8,
+      "high_rate": 0,
+      "high_successes": 0,
+      "low_level": 1,
+      "low_rate": 0,
+      "low_successes": 0,
+      "paired_difference": 0,
+      "per_seed_paired_differences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "seed_cluster_bootstrap_95_percent_interval": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "contrast": "snapshot - history",
+      "episodes_per_level": 128,
+      "factor": "observation",
+      "high_level": "snapshot",
+      "high_rate": 0,
+      "high_successes": 0,
+      "low_level": "history",
+      "low_rate": 0,
+      "low_successes": 0,
+      "paired_difference": 0,
+      "per_seed_paired_differences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "seed_cluster_bootstrap_95_percent_interval": [
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "decision_count": 277,
+  "episode_count": 256,
+  "episodes_sha256": "f0fcfe3460622998cf731c66ace9a161c8bc3594754746da8667b63384e9e8ea",
+  "failure_counts": {
+    "candidate": 54,
+    "dependency": 162,
+    "invalid_action": 18,
+    "invalid_action_schema": 16,
+    "invalid_json": 6
+  },
+  "mean_completed_operations": 0.08203125,
+  "median_decision_latency_seconds": 8.998574900091626,
+  "overall_success_rate": 0,
+  "protocol_sha256": "515dd194d5f5bc39c4bb9aca21fddf634f340c0852e9d6b1d72daafbaf939866",
+  "required_operation_total": 2048,
+  "schema_valid_decisions": 255,
+  "schema_validity_rate": 0.9205776173285198,
+  "success_count": 0,
+  "total_completion_tokens": 3246,
+  "total_prompt_tokens": 139071,
+  "unique_seed_clusters": 8
+}

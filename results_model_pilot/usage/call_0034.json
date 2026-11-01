@@ -1,0 +1,139 @@
+{
+  "totalPremiumRequestCost": 1,
+  "totalUserRequests": 1,
+  "totalNanoAiu": 84275500,
+  "aiCreditsStatus": "complete",
+  "tokenDetails": {
+    "input": {
+      "tokenCount": 3
+    },
+    "cache_read": {
+      "tokenCount": 9033
+    },
+    "cache_write": {
+      "tokenCount": 5533
+    },
+    "output": {
+      "tokenCount": 121
+    }
+  },
+  "totalApiDurationMs": 3159,
+  "sessionStartTime": "2026-11-01T05:14:48.864Z",
+  "codeChanges": {
+    "linesAdded": 0,
+    "linesRemoved": 0,
+    "filesModifiedCount": 0,
+    "filesModified": []
+  },
+  "modelMetrics": {
+    "gpt-6-luna": {
+      "requests": {
+        "count": 1,
+        "cost": 1
+      },
+      "usage": {
+        "inputTokens": 14569,
+        "outputTokens": 121,
+        "cacheReadTokens": 9033,
+        "cacheWriteTokens": 5533,
+        "reasoningTokens": 105
+      },
+      "cacheExpiresAt": "2026-11-01T05:45:04.093Z",
+      "totalNanoAiu": 84275500,
+      "aiCreditsStatus": "complete",
+      "tokenDetails": {
+        "input": {
+          "tokenCount": 3
+        },
+        "cache_read": {
+          "tokenCount": 9033
+        },
+        "cache_write": {
+          "tokenCount": 5533
+        },
+        "output": {
+          "tokenCount": 121
+        }
+      }
+    }
+  },
+  "agentMetrics": {
+    "main": {
+      "totalApiDurationMs": 3159,
+      "totalNanoAiu": 84275500,
+      "modelMetrics": {
+        "gpt-6-luna": {
+          "requests": {
+            "count": 1,
+            "cost": 1
+          },
+          "usage": {
+            "inputTokens": 14569,
+            "outputTokens": 121,
+            "cacheReadTokens": 9033,
+            "cacheWriteTokens": 5533,
+            "reasoningTokens": 105
+          },
+          "totalNanoAiu": 84275500,
+          "tokenDetails": {
+            "input": {
+              "tokenCount": 3
+            },
+            "cache_read": {
+              "tokenCount": 9033
+            },
+            "cache_write": {
+              "tokenCount": 5533
+            },
+            "output": {
+              "tokenCount": 121
+            }
+          }
+        }
+      }
+    }
+  },
+  "providerModelMetrics": [
+    {
+      "provider": {
+        "id": "copilot",
+        "label": "GitHub Copilot",
+        "kind": "copilot"
+      },
+      "modelId": "gpt-6-luna",
+      "metrics": {
+        "requests": {
+          "count": 1,
+          "cost": 1
+        },
+        "usage": {
+          "inputTokens": 14569,
+          "outputTokens": 121,
+          "cacheReadTokens": 9033,
+          "cacheWriteTokens": 5533,
+          "reasoningTokens": 105
+        },
+        "totalNanoAiu": 84275500,
+        "aiCreditsStatus": "complete",
+        "tokenDetails": {
+          "input": {
+            "tokenCount": 3
+          },
+          "cache_read": {
+            "tokenCount": 9033
+          },
+          "cache_write": {
+            "tokenCount": 5533
+          },
+          "output": {
+            "tokenCount": 121
+          }
+        }
+      },
+      "modelDisplayName": "GPT-6 Luna"
+    }
+  ],
+  "currentModel": "gpt-6-luna",
+  "lastCallInputTokens": 14569,
+  "lastCallOutputTokens": 121
+}
