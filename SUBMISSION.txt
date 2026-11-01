@@ -1,12 +1,15 @@
 SUBMISSION HANDOFF - 1 NOVEMBER 2026
 
 AUTHORED DRAFT
-Author: Shereen Anand
-Affiliation: Microsoft Research, Bangalore, India
-Publication email: t-sheanand@microsoft.com
-The author and affiliation were supplied by the author. All contribution,
-authorship, employer-publication policy, and affiliation wording should be
-reviewed and approved by the author before release.
+Authors:
+Shereen Anand, Amazon (work done while at Amazon; currently at Microsoft
+Research; this idea is independent of that affiliation) — shereenv@amazon.com
+Ju Wang, University College London
+Deepanway Ghosal, Google DeepMind, India
+Yali Du, King's College London — yali.du@kcl.ac.uk
+R. Venkatesh Babu, Indian Institute of Science — venky@iisc.ac.in
+Public emails are included only where verified. Author order and affiliation
+wording should be reviewed and approved by the authors before release.
 
 paper.pdf is the authored full manuscript including references and appendix;
 its page count must be regenerated after the exploratory-model results were
